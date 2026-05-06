@@ -1,15 +1,12 @@
 using BepInEx;
 using BepInEx.Logging;
-using Comfort.Common;
-using EFT;
 using EFT.UI;
 using SPT.Reflection.Patching;
-using UnityEngine;
 
 namespace tarkin.cruelty.bep
 {
     [BepInPlugin("com.tarkin.cruelty", MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
-    public class Plugin : BaseUnityPlugin
+    internal partial class Plugin : BaseUnityPlugin
     {
         public static new ManualLogSource Logger { get; private set; }
 

@@ -1,5 +1,6 @@
 ﻿using EFT.UI;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ namespace tarkin.cruelty.bep
 
         private AssetBundle _bundle;
 
+        List<IDisposable> _disposables = new List<IDisposable>();
+
         internal UILoader(string pathBundleDir)
         {
             _pathBundleDir = pathBundleDir;
@@ -19,19 +22,12 @@ namespace tarkin.cruelty.bep
         public void Load(CommonUI commonUI)
         {
             string bundlePath = Path.Combine(_pathBundleDir, "cruelty-ui");
-            if (!File.Exists(bundlePath))
-            {
-                Plugin.Logger.LogWarning($"bundle not found at: {bundlePath}");
-                return;
-            }
-
             _bundle = AssetBundle.LoadFromFile(bundlePath);
 
-            if ( _bundle != null )
-                Plugin.Logger.LogInfo($"Successfully loaded bundle {_bundle.name}");
+            _disposables.Add(new CrueltyAdapterHealth(commonUI, _bundle));
         }
 
-        public void Unload()
+        public void UnloadBundle()
         {
             if (_bundle != null)
                 _bundle.Unload(false);
@@ -39,7 +35,12 @@ namespace tarkin.cruelty.bep
 
         public void Dispose()
         {
-            Unload();
+            foreach (var item in _disposables)
+            {
+                item.Dispose();
+            }
+
+            UnloadBundle();
         }
     }
 }

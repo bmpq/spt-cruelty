@@ -6,19 +6,22 @@ using System.Reflection;
 
 namespace tarkin.cruelty.bep
 {
-    internal class Patch_CommonUI_Awake : ModulePatch
+    internal partial class Plugin // partial class so only Plugin has access to the patch event
     {
-        public static Action<CommonUI> OnAwake;
-
-        protected override MethodBase GetTargetMethod()
+        private class Patch_CommonUI_Awake : ModulePatch
         {
-            return AccessTools.Method(typeof(CommonUI), nameof(CommonUI.Awake));
-        }
+            public static event Action<CommonUI> OnAwake;
 
-        [PatchPostfix]
-        private static void PatchPostfix(CommonUI __instance)
-        {
-            OnAwake?.Invoke(__instance);
+            protected override MethodBase GetTargetMethod()
+            {
+                return AccessTools.Method(typeof(CommonUI), nameof(CommonUI.Awake));
+            }
+
+            [PatchPostfix]
+            private static void PatchPostfix(CommonUI __instance)
+            {
+                OnAwake?.Invoke(__instance);
+            }
         }
     }
 }

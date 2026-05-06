@@ -24,6 +24,9 @@
     <Reference Include="$(SPTPath)\EscapeFromTarkov_Data\Managed\UnityEngine.UI.dll">
       <Private>False</Private>
     </Reference>
+    <Reference Include="$(SPTPath)\EscapeFromTarkov_Data\Managed\Unity.TextMeshPro.dll">
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
 
   <Target Name="CopyFilesAfterBuild" AfterTargets="Build">
