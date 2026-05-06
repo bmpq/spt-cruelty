@@ -5,6 +5,7 @@ obj/
 
 .vs/
 .vsconfig
+*.csproj.user
 
 .References/
 
