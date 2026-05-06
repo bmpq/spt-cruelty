@@ -2,6 +2,10 @@ using BepInEx;
 using BepInEx.Logging;
 using EFT.UI;
 using SPT.Reflection.Patching;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 
 namespace tarkin.cruelty.bep
 {
@@ -12,7 +16,8 @@ namespace tarkin.cruelty.bep
 
         private PatchManager _patchManager;
 
-        private UILoader _loader;
+        private AssetBundle _bundle;
+        List<IDisposable> _disposables = new List<IDisposable>();
 
         void Start()
         {
@@ -21,25 +26,43 @@ namespace tarkin.cruelty.bep
             _patchManager = new PatchManager(this, autoPatch: true);
             _patchManager.EnablePatches();
 
-            _loader = new UILoader(System.IO.Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty"));
-
-            Patch_CommonUI_Awake.OnAwake += _loader.Load;
+            Patch_CommonUI_Awake.OnAwake += Load;
             if (MonoBehaviourSingleton<CommonUI>.Instantiated)
             {
-                _loader.Load(MonoBehaviourSingleton<CommonUI>.Instance);
+                Load(MonoBehaviourSingleton<CommonUI>.Instance);
             }
+        }
+
+        void Load(CommonUI commonUI)
+        {
+            string bundlePath = Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty", "cruelty-ui");
+            _bundle = AssetBundle.LoadFromFile(bundlePath);
+
+            _disposables.Add(new CrueltyAdapterHealth(commonUI, _bundle));
         }
 
         void Update()
         {
-            _loader.Update();
+            foreach (var item in _disposables)
+            {
+                if (item is IUnityUpdateReceiver receiver)
+                {
+                    receiver.Update();
+                }
+            }
         }
 
         void OnDestroy()
         {
-            Patch_CommonUI_Awake.OnAwake -= _loader.Load;
+            Patch_CommonUI_Awake.OnAwake -= Load;
 
-            _loader.Dispose();
+            foreach (var item in _disposables)
+            {
+                item.Dispose();
+            }
+
+            if (_bundle != null)
+                _bundle.Unload(false);
 
             _patchManager.DisablePatches();
             _patchManager = null;
