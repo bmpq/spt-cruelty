@@ -39,6 +39,7 @@ namespace tarkin.cruelty.bep
             _bundle = AssetBundle.LoadFromFile(bundlePath);
 
             _disposables.Add(new CrueltyAdapterHealth(commonUI, _bundle));
+            _disposables.Add(new CrueltyAdapterPointer(commonUI, _bundle));
         }
 
         void Update()
