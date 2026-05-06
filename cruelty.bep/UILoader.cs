@@ -27,6 +27,17 @@ namespace tarkin.cruelty.bep
             _disposables.Add(new CrueltyAdapterHealth(commonUI, _bundle));
         }
 
+        public void Update()
+        {
+            foreach (var item in _disposables)
+            {
+                if (item is IUnityUpdateReceiver receiver)
+                {
+                    receiver.Update();
+                }
+            }
+        }
+
         public void UnloadBundle()
         {
             if (_bundle != null)

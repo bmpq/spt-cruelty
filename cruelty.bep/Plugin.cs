@@ -30,6 +30,11 @@ namespace tarkin.cruelty.bep
             }
         }
 
+        void Update()
+        {
+            _loader.Update();
+        }
+
         void OnDestroy()
         {
             Patch_CommonUI_Awake.OnAwake -= _loader.Load;

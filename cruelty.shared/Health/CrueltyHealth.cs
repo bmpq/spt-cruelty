@@ -13,7 +13,7 @@ namespace tarkin.cruelty.shared.Health
 
         public void SetHealth(float current, float max)
         {
-            textHP.text = current.ToString("D");
+            textHP.text = current.ToString("F0");
 
             float healthPercentage = (float)current / max;
             coloredGraphic.color = Color.Lerp(colorLow, colorFull, healthPercentage);
