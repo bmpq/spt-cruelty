@@ -15,10 +15,9 @@ namespace tarkin.cruelty.bep
 
         private GamePlayerOwner _playerOwner = null;
 
-        public CrueltyAdapterAmmo(CommonUI commonUI, AssetBundle bundle, GamePlayerOwner playerOwner)
+        public CrueltyAdapterAmmo(CommonUI commonUI, GameObject prefabAmmo, GamePlayerOwner playerOwner)
         {
-            GameObject prefab = bundle.LoadAsset<GameObject>("Packages/com.tarkin.cruelty.shared/Ammo/CrueltyAmmo.prefab");
-            _crueltyAmmo = GameObject.Instantiate(prefab, commonUI.EftBattleUIScreen.transform).GetComponent<CrueltyAmmo>();
+            _crueltyAmmo = GameObject.Instantiate(prefabAmmo, commonUI.EftBattleUIScreen.transform).GetComponent<CrueltyAmmo>();
 
             ChangePlayerOwner(playerOwner);
         }

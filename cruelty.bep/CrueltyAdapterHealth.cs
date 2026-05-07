@@ -25,7 +25,7 @@ namespace tarkin.cruelty.bep
 
         GamePlayerOwner _playerOwner;
 
-        public CrueltyAdapterHealth(CommonUI commonUI, AssetBundle bundle, GamePlayerOwner playerOwner)
+        public CrueltyAdapterHealth(CommonUI commonUI, GameObject prefabHealth, GamePlayerOwner playerOwner)
         {
             _eftCharacterHealthPanel = commonUI.EftBattleUIScreen.transform.Find("CharacterHealthPanel");
 
@@ -39,8 +39,7 @@ namespace tarkin.cruelty.bep
             _eftBodyParts.gameObject.SetActive(false);
             _eftBodyPartsBackground.gameObject.SetActive(false);
 
-            GameObject prefab = bundle.LoadAsset<GameObject>("Packages/com.tarkin.cruelty.shared/Health/CrueltyHealth.prefab");
-            _crueltyHealth = GameObject.Instantiate(prefab, _eftCharacterHealthPanel).GetComponent<CrueltyHealth>();
+            _crueltyHealth = GameObject.Instantiate(prefabHealth, _eftCharacterHealthPanel).GetComponent<CrueltyHealth>();
 
             _playerOwner = playerOwner;
         }

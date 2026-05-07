@@ -13,11 +13,9 @@ namespace tarkin.cruelty.bep
     {
         readonly CrueltyBorder _crueltyBorder;
 
-        public CrueltyAdapterBorder(CommonUI commonUI, AssetBundle bundle, GamePlayerOwner playerOwner)
+        public CrueltyAdapterBorder(CommonUI commonUI, GameObject prefabBorder, GamePlayerOwner playerOwner)
         {
-            GameObject prefab = bundle.LoadAsset<GameObject>("Packages/com.tarkin.cruelty.shared/Border/CrueltyBorder.prefab");
-
-            _crueltyBorder = GameObject.Instantiate(prefab, commonUI.EftBattleUIScreen.transform).GetComponent<CrueltyBorder>();
+            _crueltyBorder = GameObject.Instantiate(prefabBorder, commonUI.EftBattleUIScreen.transform).GetComponent<CrueltyBorder>();
             _crueltyBorder.SetBorder(CrueltyBorder.BorderType.None);
 
             ChangePlayerOwner(playerOwner);

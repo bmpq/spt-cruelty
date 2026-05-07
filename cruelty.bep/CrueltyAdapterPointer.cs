@@ -21,7 +21,7 @@ namespace tarkin.cruelty.bep
         bool _sensing;
         bool _actionAvailable;
 
-        public CrueltyAdapterPointer(CommonUI commonUI, AssetBundle bundle)
+        public CrueltyAdapterPointer(CommonUI commonUI, GameObject prefabPointer)
         {
             Patch_ActionPanel_AvailableInteractionStateChangedHandler.OnPostfix += AvailableInteractionStateChanged;
             Patch_ActionPanel_ShowPointer.OnPostfix += OnSenseChange;
@@ -29,8 +29,7 @@ namespace tarkin.cruelty.bep
             _eftPointer = Field_ActionPanel__pointer.GetValue(commonUI.EftBattleUIScreen.ActionPanel) as UIPointer;
             _eftPointer.gameObject.SetActive(false);
 
-            GameObject prefab = bundle.LoadAsset<GameObject>("Packages/com.tarkin.cruelty.shared/Pointer/CrueltyPointer.prefab");
-            _crueltyPointer = GameObject.Instantiate(prefab, commonUI.EftBattleUIScreen.ActionPanel.transform).GetComponent<CrueltyPointer>();
+            _crueltyPointer = GameObject.Instantiate(prefabPointer, commonUI.EftBattleUIScreen.ActionPanel.transform).GetComponent<CrueltyPointer>();
 
             _crueltyPointer.HideCursor();
         }

@@ -12,10 +12,9 @@ namespace tarkin.cruelty.bep
 
         GamePlayerOwner _playerOwner;
 
-        public CrueltySixthSense(CommonUI commonUI, AssetBundle bundle, GamePlayerOwner gamePlayerOwner) 
+        public CrueltySixthSense(CommonUI commonUI, GameObject prefabSixthSense, GamePlayerOwner gamePlayerOwner) 
         {
-            GameObject prefab = bundle.LoadAsset<GameObject>("Packages/com.tarkin.cruelty.shared/SixthSense/CrueltySixthSense.prefab");
-            _crueltyEye = GameObject.Instantiate(prefab, commonUI.EftBattleUIScreen.transform);
+            _crueltyEye = GameObject.Instantiate(prefabSixthSense, commonUI.EftBattleUIScreen.transform);
             _crueltyEye.SetActive(false);
 
             ChangePlayerOwner(gamePlayerOwner);

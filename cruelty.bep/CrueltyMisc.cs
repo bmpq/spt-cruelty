@@ -16,7 +16,7 @@ namespace tarkin.cruelty.bep
         Transform _eftQuickAccessPanel;
         Vector2 _eftQuickAccessPanelOriginalPosition;
 
-        public CrueltyMisc(CommonUI commonUI, AssetBundle bundle)
+        public CrueltyMisc(CommonUI commonUI, GameObject prefabActivateSoftware)
         {
             _eftStancePanel = commonUI.EftBattleUIScreen.transform.Find("BattleStancePanel");
             _eftStancePanelOriginalPosition = _eftStancePanel.RectTransform().anchoredPosition;
@@ -30,8 +30,7 @@ namespace tarkin.cruelty.bep
             _eftQuickAccessPanelOriginalPosition = _eftQuickAccessPanel.RectTransform().anchoredPosition;
             _eftQuickAccessPanel.RectTransform().anchoredPosition = new Vector2(0, 200);
 
-            GameObject prefab = bundle.LoadAsset<GameObject>("Packages/com.tarkin.cruelty.shared/Misc/ActivateSoftware.prefab");
-            _activateSoftware = GameObject.Instantiate(prefab, commonUI.EftBattleUIScreen.transform.parent);
+            _activateSoftware = GameObject.Instantiate(prefabActivateSoftware, commonUI.EftBattleUIScreen.transform.parent);
             _activateSoftware.SetActive(UnityEngine.Random.value > 0.992f);
         }
 

@@ -11,9 +11,9 @@ namespace tarkin.cruelty.bep
     {
         readonly Texture2D _textureBiosuit;
 
-        public CrueltyAdapterVisor(AssetBundle bundle)
+        public CrueltyAdapterVisor(Texture2D textureBiosuit)
         {
-            _textureBiosuit = bundle.LoadAsset<Texture2D>("Packages/com.tarkin.cruelty.shared/Border/CR_terrorsuit.png");
+            _textureBiosuit = textureBiosuit;
 
             if (_textureBiosuit == null)
             {

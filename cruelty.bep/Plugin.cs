@@ -7,7 +7,9 @@ using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using TMPro;
 using UnityEngine;
 
 namespace tarkin.cruelty.bep
@@ -21,7 +23,6 @@ namespace tarkin.cruelty.bep
 
         private PatchManager _patchManager;
 
-        private AssetBundle _bundle;
         List<IDisposable> _disposables = new List<IDisposable>();
 
         void Start()
@@ -43,17 +44,30 @@ namespace tarkin.cruelty.bep
         void Load(CommonUI commonUI)
         {
             string bundlePath = Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty", "cruelty-ui");
-            _bundle = AssetBundle.LoadFromFile(bundlePath);
+            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
+
+            GameObject[] allPrefabs = bundle.LoadAllAssets<GameObject>();
+
+            GameObject prefabHealth = allPrefabs.First(p => p.name == "CrueltyHealth");
+            GameObject prefabAmmo = allPrefabs.First(p => p.name == "CrueltyAmmo");
+            GameObject prefabPointer = allPrefabs.First(p => p.name == "CrueltyPointer");
+            GameObject prefabBorder = allPrefabs.First(p => p.name == "CrueltyBorder");
+            GameObject prefabSixthSense = allPrefabs.First(p => p.name == "CrueltySixthSense");
+            GameObject prefabActivateSoftware = allPrefabs.First(p => p.name == "ActivateSoftware");
+
+            Texture2D textureBiosuit = bundle.LoadAllAssets<Texture2D>().First(t => t.name == "CR_terrorsuit");
 
             GamePlayerOwner currentBattleUIPlayerOwner = (Field_BattleUIScreen__controller.GetValue(commonUI.EftBattleUIScreen) as EftBattleUIScreenController)?.Owner;
 
-            _disposables.Add(new CrueltyAdapterHealth(commonUI, _bundle, currentBattleUIPlayerOwner));
-            _disposables.Add(new CrueltyAdapterAmmo(commonUI, _bundle, currentBattleUIPlayerOwner));
-            _disposables.Add(new CrueltyAdapterPointer(commonUI, _bundle));
-            _disposables.Add(new CrueltyAdapterVisor(_bundle));
-            _disposables.Add(new CrueltyAdapterBorder(commonUI, _bundle, currentBattleUIPlayerOwner));
-            _disposables.Add(new CrueltySixthSense(commonUI, _bundle, currentBattleUIPlayerOwner));
-            _disposables.Add(new CrueltyMisc(commonUI, _bundle));
+            _disposables.Add(new CrueltyAdapterHealth(commonUI, prefabHealth, currentBattleUIPlayerOwner));
+            _disposables.Add(new CrueltyAdapterAmmo(commonUI, prefabAmmo, currentBattleUIPlayerOwner));
+            _disposables.Add(new CrueltyAdapterPointer(commonUI, prefabPointer));
+            _disposables.Add(new CrueltyAdapterVisor(textureBiosuit));
+            _disposables.Add(new CrueltyAdapterBorder(commonUI, prefabBorder, currentBattleUIPlayerOwner));
+            _disposables.Add(new CrueltySixthSense(commonUI, prefabSixthSense, currentBattleUIPlayerOwner));
+            _disposables.Add(new CrueltyMisc(commonUI, prefabActivateSoftware));
+
+            bundle.Unload(false);
         }
 
         void OnPlayerOwnerChanged(GamePlayerOwner playerOwner)
@@ -87,9 +101,6 @@ namespace tarkin.cruelty.bep
             {
                 item.Dispose();
             }
-
-            if (_bundle != null)
-                _bundle.Unload(false);
 
             _patchManager.DisablePatches();
             _patchManager = null;
