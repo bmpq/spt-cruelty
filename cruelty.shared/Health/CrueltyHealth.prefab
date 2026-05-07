@@ -188,6 +188,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textHP: {fileID: 2390368432597674509}
   coloredGraphic: {fileID: 4385028125240592618}
+  flipbook: {fileID: 1463313019625423896}
+  fpsFine: 30
+  fpsHurt: 60
   colorFull: {r: 0, g: 1, b: 0.42045474, a: 1}
   colorLow: {r: 1, g: 0, b: 0, a: 1}
 --- !u!222 &2142540022127614997

@@ -8,6 +8,9 @@ namespace tarkin.cruelty.shared.Health
     {
         [SerializeField] private TMP_Text textHP;
         [SerializeField] private Graphic coloredGraphic;
+        [SerializeField] private UIFlipbookController flipbook;
+        [SerializeField] private float fpsFine = 30;
+        [SerializeField] private float fpsHurt = 60;
         [SerializeField] private Color colorFull;
         [SerializeField] private Color colorLow;
 
@@ -17,6 +20,8 @@ namespace tarkin.cruelty.shared.Health
 
             float healthPercentage = (float)current / max;
             coloredGraphic.color = Color.Lerp(colorLow, colorFull, healthPercentage);
+
+            flipbook.framesPerSecond = Mathf.Lerp(fpsHurt, fpsFine, healthPercentage);
         }
     }
 }
