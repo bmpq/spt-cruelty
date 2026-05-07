@@ -53,6 +53,7 @@ namespace tarkin.cruelty.bep
             _disposables.Add(new CrueltyAdapterVisor(_bundle));
             _disposables.Add(new CrueltyAdapterBorder(commonUI, _bundle, currentBattleUIPlayerOwner));
             _disposables.Add(new CrueltySixthSense(commonUI, _bundle, currentBattleUIPlayerOwner));
+            _disposables.Add(new CrueltyMisc(commonUI, _bundle));
         }
 
         void OnPlayerOwnerChanged(GamePlayerOwner playerOwner)
