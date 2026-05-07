@@ -16,6 +16,7 @@ namespace tarkin.cruelty.bep
 
         readonly Transform _eftCharacterHealthPanel;
         readonly Transform _eftBodyParts;
+        readonly Transform _eftBodyPartsBackground;
 
         readonly Transform _eftEffectsPanel;
         readonly Vector2 _effectsPanelOriginalPos;
@@ -29,12 +30,14 @@ namespace tarkin.cruelty.bep
             _eftCharacterHealthPanel = commonUI.EftBattleUIScreen.transform.Find("CharacterHealthPanel");
 
             _eftBodyParts = _eftCharacterHealthPanel.Find("BodyParts");
+            _eftBodyPartsBackground = _eftCharacterHealthPanel.Find("Background");
             _eftEffectsPanel = _eftCharacterHealthPanel.Find("EffectsPanel");
 
             _effectsPanelOriginalPos = _eftEffectsPanel.RectTransform().anchoredPosition;
             _eftEffectsPanel.RectTransform().anchoredPosition = new Vector2(570f, -250f);
 
             _eftBodyParts.gameObject.SetActive(false);
+            _eftBodyPartsBackground.gameObject.SetActive(false);
 
             GameObject prefab = bundle.LoadAsset<GameObject>("Packages/com.tarkin.cruelty.shared/Health/CrueltyHealth.prefab");
             _crueltyHealth = GameObject.Instantiate(prefab, _eftCharacterHealthPanel).GetComponent<CrueltyHealth>();
@@ -59,6 +62,7 @@ namespace tarkin.cruelty.bep
         public void Dispose()
         {
             _eftBodyParts.gameObject.SetActive(true);
+            _eftBodyPartsBackground.gameObject.SetActive(true);
             _eftEffectsPanel.RectTransform().anchoredPosition = _effectsPanelOriginalPos;
 
             GameObject.Destroy(_crueltyHealth.gameObject);
