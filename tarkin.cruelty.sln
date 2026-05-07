@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.5.11723.231
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tarkin.cruelty.shared", "cruelty.shared\tarkin.cruelty.shared.csproj", "{CCD4E5E9-F3B2-EF86-E27C-AAF5062C6CA1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tarkin.cruelty.shared.ui", "cruelty.shared.ui\tarkin.cruelty.shared.ui.csproj", "{CCD4E5E9-F3B2-EF86-E27C-AAF5062C6CA1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tarkin.cruelty.bep", "cruelty.bep\tarkin.cruelty.bep.csproj", "{7E7D71E3-4BEA-1B58-92D0-4CEC1C51F2E3}"
 EndProject
