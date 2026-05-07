@@ -11,9 +11,8 @@ using tarkin.cruelty.shared.Health;
 
 namespace tarkin.cruelty.bep
 {
-    public class CrueltyAdapterHealth : IDisposable, IUnityUpdateReceiver
+    public class CrueltyAdapterHealth : IDisposable, IUnityUpdateReceiver, IPlayerOwnerDependent
     {
-        static readonly FieldInfo Field_BattleUIScreen_player_0 = AccessTools.Field(typeof(EftBattleUIScreen), "player_0");
 
         readonly Transform _eftCharacterHealthPanel;
         readonly Transform _eftBodyParts;
@@ -23,9 +22,9 @@ namespace tarkin.cruelty.bep
 
         readonly CrueltyHealth _crueltyHealth;
 
-        Player _player;
+        GamePlayerOwner _playerOwner;
 
-        public CrueltyAdapterHealth(CommonUI commonUI, AssetBundle bundle)
+        public CrueltyAdapterHealth(CommonUI commonUI, AssetBundle bundle, GamePlayerOwner playerOwner)
         {
             _eftCharacterHealthPanel = commonUI.EftBattleUIScreen.transform.Find("CharacterHealthPanel");
 
@@ -40,28 +39,25 @@ namespace tarkin.cruelty.bep
             GameObject prefab = bundle.LoadAsset<GameObject>("Packages/com.tarkin.cruelty.shared/Health/CrueltyHealth.prefab");
             _crueltyHealth = GameObject.Instantiate(prefab, _eftCharacterHealthPanel).GetComponent<CrueltyHealth>();
 
-            Patch_EftBattleUIScreen_Show.OnShow += OnPlayerChange;
-            _player = Field_BattleUIScreen_player_0.GetValue(commonUI.EftBattleUIScreen) as Player;
+            _playerOwner = playerOwner;
         }
 
-        void OnPlayerChange(GamePlayerOwner owner)
+        public void ChangePlayerOwner(GamePlayerOwner owner)
         {
-            _player = owner.Player;
+            _playerOwner = owner;
         }
 
         public void Update()
         {
-            if (_player == null)
+            if (_playerOwner == null || _playerOwner.Player == null)
                 return;
 
-            ValueStruct currentHealth = _player.ActiveHealthController.GetBodyPartHealth(EBodyPart.Common, rounded: true);
+            ValueStruct currentHealth = _playerOwner.Player.ActiveHealthController.GetBodyPartHealth(EBodyPart.Common, rounded: true);
             _crueltyHealth.SetHealth(currentHealth.Current, currentHealth.Maximum);
         }
 
         public void Dispose()
         {
-            Patch_EftBattleUIScreen_Show.OnShow -= OnPlayerChange;
-
             _eftBodyParts.gameObject.SetActive(true);
             _eftEffectsPanel.RectTransform().anchoredPosition = _effectsPanelOriginalPos;
 
