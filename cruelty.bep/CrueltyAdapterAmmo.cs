@@ -52,12 +52,12 @@ namespace tarkin.cruelty.bep
         {
             if (prevHands != null && prevHands is Player.FirearmController prevFirearmController)
             {
-                prevFirearmController.OnShot -= Refresh;
+                prevFirearmController.OnShot -= OnShot;
             }
 
             if (currentHands is Player.FirearmController firearmController && firearmController.Weapon != null)
             {
-                firearmController.OnShot += Refresh;
+                firearmController.OnShot += OnShot;
 
                 _crueltyAmmo.gameObject.SetActive(true);
 
@@ -67,6 +67,12 @@ namespace tarkin.cruelty.bep
             {
                 _crueltyAmmo.gameObject.SetActive(false);
             }
+        }
+
+        private void OnShot()
+        {
+            _crueltyAmmo.Spin();
+            Refresh();
         }
 
         private void Refresh()

@@ -168,7 +168,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -142.6, y: -3.7}
+  m_AnchoredPosition: {x: -132, y: -0.0000030994}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5598357401443041735
@@ -396,3 +396,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   textMag: {fileID: 3109305714865774237}
   textInventory: {fileID: 1395423426860343750}
+  spinner: {fileID: 9208296276659798474}
+  spinAddAmount: -2000
+  spinDecayRate: 3
