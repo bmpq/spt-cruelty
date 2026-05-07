@@ -4,4 +4,6 @@ global using NotificationManager = NotificationManagerClass;
 global using EftBattleUIScreenController = EFT.UI.EftBattleUIScreen.GClass3865;
 global using Ammo = AmmoItemClass;
 global using Magazine = MagazineItemClass;
+global using RefreshItemEventArgs = GEventArgs18;
+global using RemoveItemEventArgs = GEventArgs3;
 #endif

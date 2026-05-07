@@ -29,6 +29,7 @@ namespace tarkin.cruelty.bep
             {
                 Player_OnHandsControllerChanged(_playerOwner.Player.HandsController, null);
                 _playerOwner.Player.OnHandsControllerChanged -= Player_OnHandsControllerChanged;
+                _playerOwner.Player.InventoryController.RefreshItemEvent -= InventoryController_RefreshItemEvent;
             }
 
             _playerOwner = playerOwner;
@@ -37,20 +38,26 @@ namespace tarkin.cruelty.bep
                 return;
 
             playerOwner.Player.OnHandsControllerChanged += Player_OnHandsControllerChanged;
+            playerOwner.Player.InventoryController.RefreshItemEvent += InventoryController_RefreshItemEvent;
 
             Player_OnHandsControllerChanged(null, playerOwner.Player.HandsController);
+        }
+
+        private void InventoryController_RefreshItemEvent(RefreshItemEventArgs eventArgs)
+        {
+            Refresh();
         }
 
         private void Player_OnHandsControllerChanged(Player.AbstractHandsController prevHands, Player.AbstractHandsController currentHands)
         {
             if (prevHands != null && prevHands is Player.FirearmController prevFirearmController)
             {
-                prevFirearmController.OnShot -= OnShot;
+                prevFirearmController.OnShot -= Refresh;
             }
 
             if (currentHands is Player.FirearmController firearmController && firearmController.Weapon != null)
             {
-                firearmController.OnShot += OnShot;
+                firearmController.OnShot += Refresh;
 
                 _crueltyAmmo.gameObject.SetActive(true);
 
@@ -62,7 +69,7 @@ namespace tarkin.cruelty.bep
             }
         }
 
-        private void OnShot()
+        private void Refresh()
         {
             SetAmmoCounter((_playerOwner.Player.HandsController as Player.FirearmController).Weapon);
         }
