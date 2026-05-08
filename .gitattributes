@@ -4,3 +4,4 @@
 *.png binary
 *.bin binary
 *SDF.asset binary
+*RASTER.asset binary

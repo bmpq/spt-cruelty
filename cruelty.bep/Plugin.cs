@@ -58,6 +58,9 @@ namespace tarkin.cruelty.bep
 
             Texture2D textureBiosuit = bundle.LoadAllAssets<Texture2D>().First(t => t.name == "CR_terrorsuit");
 
+            TMP_FontAsset font = bundle.LoadAllAssets<TMP_FontAsset>().First(f => f.name == "XanhMono-Regular SDF");
+            TMP_FontAsset font2 = bundle.LoadAllAssets<TMP_FontAsset>().First(f => f.name == "gamefont RASTER");
+
             GamePlayerOwner currentBattleUIPlayerOwner = (Field_BattleUIScreen__controller.GetValue(commonUI.EftBattleUIScreen) as EftBattleUIScreenController)?.Owner;
 
             _disposables.Add(new CrueltyAdapterHealth(commonUI, prefabHealth, currentBattleUIPlayerOwner));
@@ -67,6 +70,7 @@ namespace tarkin.cruelty.bep
             _disposables.Add(new CrueltyAdapterBorder(commonUI, prefabBorder, currentBattleUIPlayerOwner));
             _disposables.Add(new CrueltySixthSense(commonUI, prefabSixthSense, currentBattleUIPlayerOwner));
             _disposables.Add(new CrueltyMisc(commonUI, prefabActivateSoftware));
+            _disposables.Add(new CrueltyIndiscriminateFontReplacer(font, font2));
             _disposables.Add(new CrueltyAdapterNotifier(prefabNotifier, MonoBehaviourSingleton<PreloaderUI>.Instance));
 
             bundle.Unload(false);
