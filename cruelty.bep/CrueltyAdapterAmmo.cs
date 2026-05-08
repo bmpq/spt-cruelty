@@ -76,7 +76,10 @@ namespace tarkin.cruelty.bep
 
         private void Refresh()
         {
-            SetAmmoCounter((_playerOwner.Player.HandsController as Player.FirearmController).Weapon);
+            if (_playerOwner.Player.HandsController is Player.FirearmController firearmController)
+            {
+                SetAmmoCounter(firearmController.Weapon);
+            }
         }
 
         private void SetAmmoCounter(Weapon weapon)
