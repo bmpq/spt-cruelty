@@ -12,6 +12,9 @@ namespace tarkin.cruelty.bep
 
         GamePlayerOwner _playerOwner;
 
+        int _consecutiveFramesDetected;
+        const int ConsecutiveFramesDetectedThreshold = 2;
+
         public CrueltySixthSense(CommonUI commonUI, GameObject prefabSixthSense, GamePlayerOwner gamePlayerOwner) 
         {
             _crueltyEye = GameObject.Instantiate(prefabSixthSense, commonUI.EftBattleUIScreen.transform);
@@ -30,7 +33,7 @@ namespace tarkin.cruelty.bep
             if (_playerOwner == null || _playerOwner.Player == null)
                 return;
 
-            bool shouldShowEye = false;
+            bool detectedThisFrame = false;
 
             foreach (var player in _playerOwner.Player.GameWorld.AllAlivePlayersList)
             {
@@ -48,11 +51,16 @@ namespace tarkin.cruelty.bep
                 if (enemyInfo.Person == null || !enemyInfo.Person.IsYourPlayer)
                     continue;
 
-                shouldShowEye = true;
+                detectedThisFrame = true;
                 break;
             }
 
-            _crueltyEye.SetActive(shouldShowEye);
+            if (detectedThisFrame)
+                _consecutiveFramesDetected++;
+            else
+                _consecutiveFramesDetected = 0;
+
+            _crueltyEye.SetActive(_consecutiveFramesDetected > ConsecutiveFramesDetectedThreshold);
         }
 
         public void Dispose()
