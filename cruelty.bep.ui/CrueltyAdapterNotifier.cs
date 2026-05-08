@@ -11,7 +11,7 @@ using EFT.Communications;
 using tarkin.cruelty.shared.ui.Notifier;
 using Comfort.Common;
 
-namespace tarkin.cruelty.bep
+namespace tarkin.cruelty.bep.ui
 {
     internal class CrueltyAdapterNotifier : IDisposable
     {

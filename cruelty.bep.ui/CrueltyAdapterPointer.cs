@@ -8,7 +8,7 @@ using System.Text;
 using tarkin.cruelty.shared.Pointer;
 using UnityEngine;
 
-namespace tarkin.cruelty.bep
+namespace tarkin.cruelty.bep.ui
 {
     internal class CrueltyAdapterPointer : IDisposable
     {

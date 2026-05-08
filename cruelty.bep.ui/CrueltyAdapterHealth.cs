@@ -9,7 +9,7 @@ using EFT.HealthSystem;
 
 using tarkin.cruelty.shared.Health;
 
-namespace tarkin.cruelty.bep
+namespace tarkin.cruelty.bep.ui
 {
     public class CrueltyAdapterHealth : IDisposable, IUnityUpdateReceiver, IPlayerOwnerDependent
     {

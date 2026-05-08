@@ -12,9 +12,9 @@ using System.Reflection;
 using TMPro;
 using UnityEngine;
 
-namespace tarkin.cruelty.bep
+namespace tarkin.cruelty.bep.ui
 {
-    [BepInPlugin("com.tarkin.cruelty", MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+    [BepInPlugin("com.tarkin.cruelty.ui", MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     internal partial class Plugin : BaseUnityPlugin
     {
         static readonly FieldInfo Field_BattleUIScreen__controller = AccessTools.Field(typeof(EftBattleUIScreen), "gparam_0");

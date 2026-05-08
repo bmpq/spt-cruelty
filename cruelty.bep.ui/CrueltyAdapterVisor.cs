@@ -5,7 +5,7 @@ using SPT.Reflection.Patching;
 using System.Reflection;
 using HarmonyLib;
 
-namespace tarkin.cruelty.bep
+namespace tarkin.cruelty.bep.ui
 {
     internal class CrueltyAdapterVisor : IDisposable
     {

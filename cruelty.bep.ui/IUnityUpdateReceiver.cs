@@ -1,4 +1,4 @@
-﻿namespace tarkin.cruelty.bep
+﻿namespace tarkin.cruelty.bep.ui
 {
     internal interface IUnityUpdateReceiver
     {

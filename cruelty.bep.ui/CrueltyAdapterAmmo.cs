@@ -7,7 +7,7 @@ using EFT.InventoryLogic;
 
 using tarkin.cruelty.shared.Ammo;
 
-namespace tarkin.cruelty.bep
+namespace tarkin.cruelty.bep.ui
 {
     internal class CrueltyAdapterAmmo : IDisposable, IPlayerOwnerDependent
     {

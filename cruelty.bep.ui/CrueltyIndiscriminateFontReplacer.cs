@@ -4,7 +4,7 @@ using SPT.Reflection.Patching;
 using HarmonyLib;
 using TMPro;
 
-namespace tarkin.cruelty.bep
+namespace tarkin.cruelty.bep.ui
 {
     internal class CrueltyIndiscriminateFontReplacer : IDisposable
     {

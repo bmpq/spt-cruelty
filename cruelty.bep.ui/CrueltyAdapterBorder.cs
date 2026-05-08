@@ -7,7 +7,7 @@ using System;
 using System.Reflection;
 using UnityEngine;
 
-namespace tarkin.cruelty.bep
+namespace tarkin.cruelty.bep.ui
 {
     internal class CrueltyAdapterBorder : IDisposable, IPlayerOwnerDependent
     {

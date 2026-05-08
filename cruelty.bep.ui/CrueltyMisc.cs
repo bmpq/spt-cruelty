@@ -3,7 +3,7 @@ using UnityEngine;
 
 using EFT.UI;
 
-namespace tarkin.cruelty.bep
+namespace tarkin.cruelty.bep.ui
 {
     internal class CrueltyMisc : IDisposable
     {
