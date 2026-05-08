@@ -52,7 +52,7 @@ namespace tarkin.cruelty.bep
                     break;
             }
 
-            _crueltyNotifier.Pop(notification.Description, duration);
+            _crueltyNotifier.Pop(notification.Description.Transliterate(), duration);
         }
 
         public void Dispose()
