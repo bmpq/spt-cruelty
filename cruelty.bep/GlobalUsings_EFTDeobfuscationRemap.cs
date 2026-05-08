@@ -7,4 +7,5 @@ global using Magazine = MagazineItemClass;
 global using RefreshItemEventArgs = GEventArgs18;
 global using RemoveItemEventArgs = GEventArgs3;
 global using CameraManager = CameraClass;
+global using Notification = NotificationAbstractClass;
 #endif

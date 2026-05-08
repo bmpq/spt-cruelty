@@ -54,6 +54,7 @@ namespace tarkin.cruelty.bep
             GameObject prefabBorder = allPrefabs.First(p => p.name == "CrueltyBorder");
             GameObject prefabSixthSense = allPrefabs.First(p => p.name == "CrueltySixthSense");
             GameObject prefabActivateSoftware = allPrefabs.First(p => p.name == "ActivateSoftware");
+            GameObject prefabNotifier = allPrefabs.First(p => p.name == "CrueltyNotifier");
 
             Texture2D textureBiosuit = bundle.LoadAllAssets<Texture2D>().First(t => t.name == "CR_terrorsuit");
 
@@ -66,6 +67,7 @@ namespace tarkin.cruelty.bep
             _disposables.Add(new CrueltyAdapterBorder(commonUI, prefabBorder, currentBattleUIPlayerOwner));
             _disposables.Add(new CrueltySixthSense(commonUI, prefabSixthSense, currentBattleUIPlayerOwner));
             _disposables.Add(new CrueltyMisc(commonUI, prefabActivateSoftware));
+            _disposables.Add(new CrueltyAdapterNotifier(prefabNotifier, MonoBehaviourSingleton<PreloaderUI>.Instance));
 
             bundle.Unload(false);
         }
@@ -90,6 +92,13 @@ namespace tarkin.cruelty.bep
                     receiver.Update();
                 }
             }
+
+#if DEBUG
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                NotificationManager.DisplayMessageNotification("test notifoacitno");
+            }
+#endif
         }
 
         void OnDestroy()
