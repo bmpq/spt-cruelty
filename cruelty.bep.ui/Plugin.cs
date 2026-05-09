@@ -46,6 +46,17 @@ namespace tarkin.cruelty.bep.ui
             string bundlePath = Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty", "cruelty-ui");
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
 
+            try
+            {
+                LoadUI(bundle, commonUI);
+            }
+            catch (Exception ex) { Plugin.Logger.LogError(ex); }
+
+            bundle.Unload(false);
+        }
+
+        void LoadUI(AssetBundle bundle, CommonUI commonUI)
+        {
             GameObject[] allPrefabs = bundle.LoadAllAssets<GameObject>();
 
             GameObject prefabHealth = allPrefabs.First(p => p.name == "CrueltyHealth");
@@ -55,8 +66,12 @@ namespace tarkin.cruelty.bep.ui
             GameObject prefabSixthSense = allPrefabs.First(p => p.name == "CrueltySixthSense");
             GameObject prefabActivateSoftware = allPrefabs.First(p => p.name == "ActivateSoftware");
             GameObject prefabNotifier = allPrefabs.First(p => p.name == "CrueltyNotifier");
+            GameObject prefabInventoryHealth = allPrefabs.First(p => p.name == "CrueltyInventoryHealth");
 
             Texture2D textureBiosuit = bundle.LoadAllAssets<Texture2D>().First(t => t.name == "CR_terrorsuit");
+
+            Sprite[] allSprites = bundle.LoadAllAssets<Sprite>();
+            Sprite spriteGridCell = allSprites.First(t => t.name == "grid_cell");
 
             TMP_FontAsset font = bundle.LoadAllAssets<TMP_FontAsset>().First(f => f.name == "XanhMono-Regular SDF");
             TMP_FontAsset font2 = bundle.LoadAllAssets<TMP_FontAsset>().First(f => f.name == "gamefont RASTER");
@@ -72,8 +87,8 @@ namespace tarkin.cruelty.bep.ui
             _disposables.Add(new CrueltyMisc(commonUI, prefabActivateSoftware));
             _disposables.Add(new CrueltyIndiscriminateFontReplacer(font, font2));
             _disposables.Add(new CrueltyAdapterNotifier(prefabNotifier, MonoBehaviourSingleton<PreloaderUI>.Instance));
-
-            bundle.Unload(false);
+            _disposables.Add(new CrueltyAdapterInventoryHealth(commonUI, prefabInventoryHealth));
+            _disposables.Add(new CrueltyAdapterInventory(commonUI, spriteGridCell));
         }
 
         void OnPlayerOwnerChanged(GamePlayerOwner playerOwner)

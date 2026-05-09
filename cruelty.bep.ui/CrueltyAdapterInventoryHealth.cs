@@ -2,26 +2,33 @@
 using UnityEngine;
 
 using EFT.UI;
-using System.Reflection;
-using HarmonyLib;
 using EFT.UI.Health;
 
 namespace tarkin.cruelty.bep.ui
 {
     internal class CrueltyAdapterInventoryHealth : IDisposable
     {
-        static readonly FieldInfo Field_InventoryScreen__itemsPanel = AccessTools.Field(typeof(InventoryScreen), "_itemsPanel");
-        static readonly FieldInfo Field_ItemsPanel__healthPanel = AccessTools.Field(typeof(ItemsPanel), "_healthPanel");
+        readonly GameObject _eftSilhouette;
 
-        public CrueltyAdapterInventoryHealth(CommonUI commonUI, AssetBundle bundle)
+        readonly GameObject _character;
+
+        public CrueltyAdapterInventoryHealth(CommonUI commonUI, GameObject prefab)
         {
-            //(Field_ItemsPanel__healthPanel.GetValue(Field_InventoryScreen__itemsPanel.GetValue(commonUI.InventoryScreen) as ItemsPanel) as InventoryScreenHealthPanel)
-            //commonUI.InventoryScreen.transform.Find("Items Panel").Find("LeftSide")
+            InventoryScreenHealthPanel healthPanel = commonUI.InventoryScreen.GetComponentInChildren<InventoryScreenHealthPanel>(true);
+
+            _eftSilhouette = healthPanel.transform.Find("Silhouette").gameObject;
+            _eftSilhouette.SetActive(false);
+
+            _character = GameObject.Instantiate(prefab, healthPanel.transform);
+            _character.transform.SetAsFirstSibling();
         }
 
         public void Dispose()
         {
+            _eftSilhouette.SetActive(true);
 
+            if (_character != null)
+                GameObject.Destroy(_character.gameObject);
         }
     }
 }
