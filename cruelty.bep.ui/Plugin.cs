@@ -72,6 +72,7 @@ namespace tarkin.cruelty.bep.ui
 
             Sprite[] allSprites = bundle.LoadAllAssets<Sprite>();
             Sprite spriteGridCell = allSprites.First(t => t.name == "grid_cell");
+            Sprite spriteUnsearchedFill = allSprites.First(t => t.name == "mystery");
 
             TMP_FontAsset font = bundle.LoadAllAssets<TMP_FontAsset>().First(f => f.name == "XanhMono-Regular SDF");
             TMP_FontAsset font2 = bundle.LoadAllAssets<TMP_FontAsset>().First(f => f.name == "gamefont RASTER");
@@ -88,7 +89,7 @@ namespace tarkin.cruelty.bep.ui
             _disposables.Add(new CrueltyIndiscriminateFontReplacer(font, font2));
             _disposables.Add(new CrueltyAdapterNotifier(prefabNotifier, MonoBehaviourSingleton<PreloaderUI>.Instance));
             _disposables.Add(new CrueltyAdapterInventoryHealth(commonUI, prefabInventoryHealth));
-            _disposables.Add(new CrueltyAdapterInventory(commonUI, spriteGridCell));
+            _disposables.Add(new CrueltyAdapterInventory(commonUI, spriteGridCell, spriteUnsearchedFill));
         }
 
         void OnPlayerOwnerChanged(GamePlayerOwner playerOwner)
