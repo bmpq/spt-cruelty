@@ -10,4 +10,5 @@ obj/
 .References/
 
 CR_*.png
+**/CR_*/**/*.png
 gamefont RASTER.asset
