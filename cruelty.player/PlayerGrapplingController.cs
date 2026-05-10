@@ -15,10 +15,15 @@ namespace tarkin.cruelty.player
 
         Transform cam;
 
-        void Awake()
+        GrappendixVisual _visual;
+
+        public void Init(Player player, GameObject prefabGrappendixVisual)
         {
-            _player = GetComponent<Player>();
+            _player = player;
             cam = _player.PlayerBones.HeadCameraCollider.transform;
+
+            _visual = Instantiate(prefabGrappendixVisual).GetComponent<GrappendixVisual>();
+            _visual.gameObject.SetActive(false);
         }
 
         void Update()
@@ -35,6 +40,9 @@ namespace tarkin.cruelty.player
             {
                 _player.MovementContext.ResetFlying();
                 _player.MovementContext.FreefallTime = 0;
+                _player.MovementContext.HasLastHeight = false;
+
+                _visual.SetPoints(GrappleTarget, _player.PlayerBones.Pelvis.Original.position);
             }
         }
 
@@ -44,8 +52,7 @@ namespace tarkin.cruelty.player
             {
                 if (cam != null && Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, maxGrappleDistance, LayerMaskController.HighPolyWithTerrainMask))
                 {
-                    GrappleTarget = hit.point;
-                    IsGrappling = true;
+                    StartGrapple(hit.point);
                 }
             }
 
@@ -55,11 +62,26 @@ namespace tarkin.cruelty.player
             }
         }
 
+        private void StartGrapple(Vector3 point)
+        {
+            GrappleTarget = point;
+            IsGrappling = true;
+            _visual.gameObject.SetActive(true);
+        }
+
         private void StopGrapple()
         {
             if (!IsGrappling)
                 return;
             IsGrappling = false;
+
+            _visual.gameObject.SetActive(false);
+        }
+
+        void OnDestroy()
+        {
+            if (_visual != null)
+                Destroy(_visual.gameObject);
         }
     }
 }

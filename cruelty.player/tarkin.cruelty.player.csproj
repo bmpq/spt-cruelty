@@ -17,6 +17,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\cruelty.shared.ui\tarkin.cruelty.shared.ui.csproj" />
+    <ProjectReference Include="..\cruelty.shared\tarkin.cruelty.shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
