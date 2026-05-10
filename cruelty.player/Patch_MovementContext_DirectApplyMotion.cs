@@ -18,19 +18,44 @@ namespace tarkin.cruelty.player
         [PatchPrefix]
         static void Prefix(MovementContext __instance, ref Vector3 motion, float deltaTime, Player ____player)
         {
-            originalSpeedLimit = __instance.CharacterController.SpeedLimit;
-
             var grapplingComp = ____player.GetComponent<PlayerGrapplingController>();
 
             if (grapplingComp == null || !grapplingComp.IsGrappling) return;
 
-            Vector3 target = grapplingComp.GrappleTarget;
-            Vector3 direction = (target - __instance.TransformPosition).normalized;
+            Vector3 currentPos = __instance.TransformPosition;
+            Vector3 toTarget = grapplingComp.GrappleTarget - currentPos;
+            float currentDistance = toTarget.magnitude;
+            Vector3 directionToTarget = toTarget.normalized;
 
-            float grappleSpeed = 30f;
+            Vector3 currentVelocity = grapplingComp.GrappleMomentum;
 
-            motion = direction * grappleSpeed * deltaTime;
+            currentVelocity += Physics.gravity * deltaTime;
 
+            float reelSpeed = 25f;
+            currentVelocity += directionToTarget * reelSpeed * deltaTime;
+
+            if (currentDistance > grapplingComp.RopeLength)
+            {
+                float stiffness = 23f;
+                float damping = 4f;
+
+                // F = -k * x
+                float stretch = currentDistance - grapplingComp.RopeLength;
+                Vector3 springForce = directionToTarget * (stretch * stiffness);
+
+                Vector3 dampingForce = -currentVelocity * damping;
+
+                currentVelocity += (springForce + dampingForce) * deltaTime;
+            }
+
+            float drag = (1f - (0.5f * deltaTime));
+            currentVelocity *= drag;
+
+            grapplingComp.GrappleMomentum = currentVelocity;
+
+            motion = currentVelocity * deltaTime;
+
+            originalSpeedLimit = __instance.CharacterController.SpeedLimit;
             __instance.CharacterController.SpeedLimit = -1f;
         }
 
