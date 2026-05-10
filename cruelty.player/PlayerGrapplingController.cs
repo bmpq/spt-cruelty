@@ -40,7 +40,12 @@ namespace tarkin.cruelty.player
             {
                 _player.MovementContext.ResetFlying();
                 _player.MovementContext.FreefallTime = 0;
-                _player.MovementContext.HasLastHeight = false;
+
+                if (_player.MovementContext.CurrentState is JumpPlayerState jumpState)
+                {
+                    _player.MovementContext.PlayerAnimatorEnableJump(enabled: false);
+                    _player.MovementContext.PlayerAnimatorEnableLanding(enabled: true);
+                }
 
                 _visual.SetPoints(GrappleTarget, _player.PlayerBones.Pelvis.Original.position);
             }
