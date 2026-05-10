@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tarkin.cruelty.world", "cru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tarkin.cruelty.shared", "cruelty.shared\tarkin.cruelty.shared.csproj", "{8882A95E-1257-B16B-AB35-6230AA14B97C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tarkin.cruelty.player", "cruelty.player\tarkin.cruelty.player.csproj", "{AF3F173A-8912-69A7-98A3-69E4F1F7B74B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{8882A95E-1257-B16B-AB35-6230AA14B97C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8882A95E-1257-B16B-AB35-6230AA14B97C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8882A95E-1257-B16B-AB35-6230AA14B97C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF3F173A-8912-69A7-98A3-69E4F1F7B74B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF3F173A-8912-69A7-98A3-69E4F1F7B74B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF3F173A-8912-69A7-98A3-69E4F1F7B74B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF3F173A-8912-69A7-98A3-69E4F1F7B74B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
