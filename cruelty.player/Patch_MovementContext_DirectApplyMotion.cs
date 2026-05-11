@@ -18,6 +18,9 @@ namespace tarkin.cruelty.player
         [PatchPrefix]
         static void Prefix(MovementContext __instance, ref Vector3 motion, float deltaTime, Player ____player)
         {
+            originalSpeedLimit = __instance.CharacterController.SpeedLimit;
+            __instance.CharacterController.SpeedLimit = -1f;
+
             var grapplingComp = ____player.GetComponent<PlayerGrapplingController>();
 
             if (grapplingComp == null || !grapplingComp.IsGrappling) return;
@@ -54,9 +57,6 @@ namespace tarkin.cruelty.player
             grapplingComp.GrappleMomentum = currentVelocity;
 
             motion = currentVelocity * deltaTime;
-
-            originalSpeedLimit = __instance.CharacterController.SpeedLimit;
-            __instance.CharacterController.SpeedLimit = -1f;
         }
 
         [PatchPostfix]
