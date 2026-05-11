@@ -14,8 +14,9 @@ namespace tarkin.cruelty.player
         private static PlayerGrapplingController instance;
         private Player _player;
 
-        public bool IsGrappling { get; private set; }
-        public bool IsHookFlying { get; private set; }
+        public bool IsGrappling => _state == GrappleState.Taut;
+
+        private GrappleState _state;
 
         public Vector3 GrappleTarget { get; private set; }
         public float RopeLength { get; private set; }
@@ -56,7 +57,7 @@ namespace tarkin.cruelty.player
 
             Vector3 playerPoint = _player.PlayerBones.Pelvis.Original.position;
 
-            if (IsHookFlying)
+            if (_state == GrappleState.Seeking)
             {
                 float step = hookSpeed * Time.deltaTime;
 
@@ -72,7 +73,6 @@ namespace tarkin.cruelty.player
                 if (ropeHit)
                 {
                     currentHookPos = ropeHitInfo.point;
-                    IsHookFlying = false;
 
                     StartGrapple(currentHookPos);
 
@@ -82,7 +82,6 @@ namespace tarkin.cruelty.player
                 else if (tipHit)
                 {
                     currentHookPos = tipHitInfo.point;
-                    IsHookFlying = false;
 
                     StartGrapple(currentHookPos);
 
@@ -100,13 +99,13 @@ namespace tarkin.cruelty.player
                     }
                 }
 
-                if (IsHookFlying)
+                if (_state == GrappleState.Seeking)
                 {
                     _visual.SetPoints(currentHookPos, playerPoint);
                 }
             }
 
-            if (IsGrappling)
+            if (_state == GrappleState.Taut)
             {
                 float distToTarget = Vector3.Distance(playerPoint, GrappleTarget);
 
@@ -147,14 +146,15 @@ namespace tarkin.cruelty.player
             currentHookPos = cam.position;
             distanceTraveled = 0f;
 
-            IsHookFlying = true;
-            _visual.gameObject.SetActive(true);
+            _state = GrappleState.Seeking;
+            _visual.SetState(GrappleState.Seeking);
         }
 
         private void StartGrapple(Vector3 point)
         {
+            _state = GrappleState.Taut;
+
             GrappleTarget = point;
-            IsGrappling = true;
 
             RopeLength = Vector3.Distance(_player.Transform.position, point);
 
@@ -162,26 +162,20 @@ namespace tarkin.cruelty.player
 
             _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f); // skip land stumble if grapple start mid air
 
-            _visual.gameObject.SetActive(true);
+            _visual.SetState(_state);
         }
 
         private void StopGrapple()
         {
-            if (IsHookFlying)
+            if (_state == GrappleState.Taut)
             {
-                IsHookFlying = false;
-                _visual.gameObject.SetActive(false);
+                ApplyExitMomentum(_player.Velocity);
             }
 
-            if (!IsGrappling)
-                return;
-            IsGrappling = false;
-
-            _visual.gameObject.SetActive(false);
-
-            ApplyExitMomentum(_player.Velocity);
+            _state = GrappleState.Retracting;
 
             _shouldMuteMovementSounds = false;
+            _visual.SetState(_state);
         }
 
         void ApplyExitMomentum(Vector3 momentum)

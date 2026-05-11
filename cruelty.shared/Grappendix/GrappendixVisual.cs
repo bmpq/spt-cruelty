@@ -3,6 +3,13 @@ using UnityEngine;
 
 namespace tarkin.cruelty.player
 {
+    public enum GrappleState
+    {
+        Seeking,
+        Taut,
+        Retracting
+    }
+
     public class GrappendixVisual : MonoBehaviour
     {
         [SerializeField] private GameObject lumpPrefab;
@@ -30,6 +37,11 @@ namespace tarkin.cruelty.player
         {
             _pointGrapple = pointGrapple;
             _pointPlayer = pointPlayer;
+        }
+
+        public void SetState(GrappleState state)
+        {
+            gameObject.SetActive(state != GrappleState.Retracting);
         }
 
         void Update()
