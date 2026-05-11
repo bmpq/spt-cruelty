@@ -40,14 +40,18 @@ namespace tarkin.cruelty.player
             _player = player;
             cam = _player.PlayerBones.HeadCameraCollider.transform;
 
+            _player.OnPlayerDead += OnPlayerDead;
+
             _visual = Instantiate(prefabGrappendixVisual).GetComponent<GrappendixVisual>();
 
             StopGrapple();
         }
 
+        private void OnPlayerDead(Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part) => Destroy(this);
+
         void Update()
         {
-            if (_player == null || !_player.IsYourPlayer || !_player.ActiveHealthController.IsAlive)
+            if (_player == null || !_player.IsYourPlayer)
             {
                 Destroy(this);
                 return;
@@ -240,6 +244,9 @@ namespace tarkin.cruelty.player
         {
             if (_visual != null)
                 Destroy(_visual.gameObject);
+
+            if (_player != null)
+                _player.OnPlayerDead -= OnPlayerDead;
 
             if (instance == this)
                 instance = null;

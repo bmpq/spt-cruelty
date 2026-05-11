@@ -49,7 +49,7 @@ namespace tarkin.cruelty.bep.ui
 
         public void Update()
         {
-            if (_playerOwner == null || _playerOwner.Player == null)
+            if (_playerOwner == null || _playerOwner.Player == null || _playerOwner.Player.ActiveHealthController == null)
                 return;
 
             ValueStruct currentHealth = _playerOwner.Player.ActiveHealthController.GetBodyPartHealth(EBodyPart.Common, rounded: true);
