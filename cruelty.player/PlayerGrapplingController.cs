@@ -16,6 +16,8 @@ namespace tarkin.cruelty.player
 
         private GrappleState _state;
 
+        private readonly LayerMask collisionMask = LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask;
+
         private Vector3 grappleTarget;
         private float ropeLength;
 
@@ -59,14 +61,14 @@ namespace tarkin.cruelty.player
             {
                 float step = hookSpeed * Time.deltaTime;
 
-                bool tipHit = Physics.Raycast(currentHookPos, hookDirection, out RaycastHit tipHitInfo, step, LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask);
+                bool tipHit = Physics.Raycast(currentHookPos, hookDirection, out RaycastHit tipHitInfo, step, collisionMask);
 
                 Vector3 nextHookPos = tipHit ? tipHitInfo.point : currentHookPos + (hookDirection * step);
 
                 Vector3 ropeDir = nextHookPos - playerPoint;
                 float ropeDist = ropeDir.magnitude;
 
-                bool ropeHit = Physics.Raycast(playerPoint, ropeDir.normalized, out RaycastHit ropeHitInfo, ropeDist, LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask);
+                bool ropeHit = Physics.Raycast(playerPoint, ropeDir.normalized, out RaycastHit ropeHitInfo, ropeDist, collisionMask);
 
                 if (ropeHit)
                 {
@@ -107,7 +109,7 @@ namespace tarkin.cruelty.player
             {
                 float distToTarget = Vector3.Distance(playerPoint, grappleTarget);
 
-                if (Physics.Raycast(playerPoint, (grappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask))
+                if (Physics.Raycast(playerPoint, (grappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, collisionMask))
                 {
                     grappleTarget = hit.point;
                 }
@@ -152,6 +154,8 @@ namespace tarkin.cruelty.player
 
             _state = GrappleState.Seeking;
             _visual.SetState(GrappleState.Seeking);
+
+            _player.ProceduralWeaponAnimation.ForceReact.AddForce(new Vector3(-1f, 0, 0), 0.1f, 0.2f, 1f);
         }
 
         private void StartGrapple(Vector3 point)
@@ -167,6 +171,8 @@ namespace tarkin.cruelty.player
             _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f); // skip land stumble if grapple start mid air
 
             _visual.SetState(_state);
+
+            _player.ProceduralWeaponAnimation.ForceReact.AddForce(1f, 0.1f, 0.2f);
         }
 
         private void ApplyGrapplePhysics(MovementContext context, ref Vector3 motion, float deltaTime)
@@ -220,7 +226,7 @@ namespace tarkin.cruelty.player
         {
             _player.MovementContext.InputMotionBeforeLimit = momentum;
 
-            if (_player.MovementContext.CurrentState is not SprintStateClass)
+            if (_player.MovementContext.CurrentState is not SprintPlayerState)
             {
                 // JumpPlayerState to apply momentum checks if previous state was Sprint
                 _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f);
