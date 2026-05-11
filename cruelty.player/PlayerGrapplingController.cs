@@ -123,6 +123,12 @@ namespace tarkin.cruelty.player
 
                 _visual.SetPoints(grappleTarget, playerPoint);
             }
+
+            if (_state == GrappleState.Retracting)
+            {
+                currentHookPos = Vector3.MoveTowards(currentHookPos, playerPoint, Time.deltaTime * hookSpeed * 0.5f);
+                _visual.SetPoints(currentHookPos, playerPoint);
+            }
         }
 
         private void HandleInput()

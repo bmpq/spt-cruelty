@@ -108,14 +108,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0db9da6de862c7428a4d31e12fad2c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 2273559608215406385}
-  grapplePoint: {fileID: 5502828498283693278}
   lumpPrefab: {fileID: 4570518786250108366, guid: deb8e54222eebfe4989d3fe4c6533fac, type: 3}
   segmentSpacing: 0.15
-  scrollSpeed: 0.1
+  scrollSpeed: 0
   baseScale: 1
   scaleVariation: 0.25
-  scaleFrequency: 4
+  scaleFrequency: 2
   scaleScrollSpeed: 8
   faceDirection: 1
   rotationOffset: {x: 0, y: 0, z: 0}
+  _pointGrapple: {x: 5.06, y: 0, z: 0}
+  _pointPlayer: {x: 0, y: 0, z: 0}

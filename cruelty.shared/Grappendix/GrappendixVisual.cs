@@ -15,13 +15,19 @@ namespace tarkin.cruelty.player
         [SerializeField] private GameObject lumpPrefab;
 
         [SerializeField] private float segmentSpacing = 0.5f;
-        [SerializeField] private float scrollSpeed = 8f;
 
+        [Space(10)]
         [SerializeField] private float baseScale = 1f;
         [SerializeField] private float scaleVariation = 0.25f;
         [SerializeField] private float scaleFrequency = 4f;
         [SerializeField] private float scaleScrollSpeed = 6f;
 
+        [Space(10)]
+        [SerializeField] private float slackFactorRate = 0.25f;
+        [SerializeField] private float slackMaxAmplitude = 0.25f;
+        [SerializeField] private float slackFrequency = 4f;
+
+        [Space(10)]
         [SerializeField] private bool faceDirection = true;
         [SerializeField] private Vector3 rotationOffset;
 
@@ -33,6 +39,9 @@ namespace tarkin.cruelty.player
         [SerializeField] private Vector3 _pointGrapple;
         [SerializeField] private Vector3 _pointPlayer;
 
+        private float _currentSlackAmplitude;
+        private GrappleState _state;
+
         public void SetPoints(Vector3 pointGrapple, Vector3 pointPlayer)
         {
             _pointGrapple = pointGrapple;
@@ -41,7 +50,7 @@ namespace tarkin.cruelty.player
 
         public void SetState(GrappleState state)
         {
-            gameObject.SetActive(state != GrappleState.Retracting);
+            _state = state;
         }
 
         void Update()
@@ -49,17 +58,28 @@ namespace tarkin.cruelty.player
             if (lumpPrefab == null)
                 return;
 
+            switch (_state)
+            {
+                case GrappleState.Seeking:
+                    _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, slackMaxAmplitude, slackFactorRate * Time.deltaTime);
+                    break;
+                case GrappleState.Taut:
+                    _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, 0f, slackFactorRate * 2f * Time.deltaTime);
+                    break;
+                case GrappleState.Retracting:
+                    _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, slackMaxAmplitude, slackFactorRate * Time.deltaTime);
+                    break;
+            }
+
             Vector3 start = _pointGrapple;
             Vector3 end = _pointPlayer;
 
             Vector3 direction = (end - start).normalized;
             currentLength = Vector3.Distance(start, end);
 
-            requiredCount = Mathf.CeilToInt(currentLength / segmentSpacing) + 1;
+            requiredCount = Mathf.CeilToInt(currentLength / segmentSpacing);
 
             EnsurePoolSize(requiredCount);
-
-            float scrollOffset = Time.time * scrollSpeed;
 
             for (int i = 0; i < lumps.Count; i++)
             {
@@ -74,21 +94,17 @@ namespace tarkin.cruelty.player
                 lump.gameObject.SetActive(true);
 
                 // Position travels FROM grapple point TO player
-                float distanceAlongLine =
-                    Mathf.Repeat((i * segmentSpacing) + scrollOffset, currentLength);
+                float distanceAlongLine = Mathf.Repeat((i * segmentSpacing), currentLength);
+                Vector3 linearPos = start + direction * distanceAlongLine;
 
-                Vector3 pos = start + direction * distanceAlongLine;
+                // -- looseness when not taut
+                float t = (float)i / lumps.Count;
+                float sineValue = Mathf.Sin(t * slackFrequency * Mathf.PI * 2f) * _currentSlackAmplitude;
+                Vector3 orthogonalDirection = Vector3.Cross(direction, Vector3.up).normalized;
+                Vector3 sineWavePoint = linearPos + orthogonalDirection * sineValue;
+                lump.position = sineWavePoint;
 
-                lump.position = pos;
-
-                if (faceDirection)
-                {
-                    lump.rotation =
-                        Quaternion.LookRotation(direction) *
-                        Quaternion.Euler(rotationOffset);
-                }
-
-                // Sinusoidal scale variation
+                // -- scale variation
                 float wave =
                     Mathf.Sin(
                         (distanceAlongLine * scaleFrequency) -
@@ -100,6 +116,13 @@ namespace tarkin.cruelty.player
                     (wave * scaleVariation);
 
                 lump.localScale = Vector3.one * scale;
+
+                if (faceDirection)
+                {
+                    lump.rotation =
+                        Quaternion.LookRotation(direction) *
+                        Quaternion.Euler(rotationOffset);
+                }
             }
         }
 
