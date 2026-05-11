@@ -91,25 +91,27 @@ namespace tarkin.cruelty.player
 
             _visual.gameObject.SetActive(false);
 
-            Vector2 inputDir = new Vector2(0, 1f);
+            ApplyExitMomentum(GrappleMomentum);
+        }
 
+        void ApplyExitMomentum(Vector3 momentum)
+        {
+            // JumpPlayerState to apply momentum checks if player input is non-zero
+            Vector2 inputDir = new Vector2(0, 1f);
             _player.InputDirection = inputDir;
             _player.Move(inputDir);
-            _player.MovementContext.InputMotion = GrappleMomentum;
+            _player.MovementContext.InputMotion = momentum;
             _player.MovementContext.InputMotionBeforeLimit = inputDir;
 
-            // JumpState on enter checks if previous state was Sprint
+            // JumpPlayerState to apply momentum also checks if previous state was Sprint
             _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f);
-            _player.MovementContext.PlayerAnimator.Animator.Update(Time.deltaTime);
-            _player.MovementContext.PlayerAnimator.Animator.Play("Jump_Move", 0, 0f);
-            _player.MovementContext.PlayerAnimator.Animator.Update(Time.deltaTime);
+            _player.MovementContext.PlayerAnimator.Animator.Update(0.1f); // triggers all bsg state change logic immediately (to write MovementContext.PreviousState)
+            _player.MovementContext.PlayerAnimator.Animator.Play("Jump_Move", 0, 0f); // enter JumpPlayerState
+            _player.MovementContext.PlayerAnimator.Animator.Update(0.1f); // immediately
 
-            if (_player.MovementContext.CurrentState is JumpStateClass jumpState)
+            if (_player.MovementContext.CurrentState is JumpPlayerState jumpState)
             {
-                jumpState.Vector3_0 = GrappleMomentum;
-                jumpState.Vector2_0 = inputDir;
-                Plugin.Logger.LogInfo(_player.MovementContext.CurrentState);
-
+                jumpState.Vector3_0 = momentum; // _initialNormalizedDirection (originally calculates from input, I override with the custom value)
             }
         }
 
