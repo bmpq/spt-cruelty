@@ -395,7 +395,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grappendix: {fileID: 212178558}
   keybind: 103
-  seekSpeed: 120
+  seekSpeed: 80
+  testTargetPoint: {x: 40, y: 0, z: 0}
 --- !u!4 &1955545771
 Transform:
   m_ObjectHideFlags: 0
@@ -462,6 +463,10 @@ PrefabInstance:
     - target: {fileID: 7180872380156647329, guid: 97afb7eb24f82b940acf28b0022f301f, type: 3}
       propertyPath: m_Name
       value: GrappendixVisual
+      objectReference: {fileID: 0}
+    - target: {fileID: 7819393506550454617, guid: 97afb7eb24f82b940acf28b0022f301f, type: 3}
+      propertyPath: _pointGrapple.x
+      value: 17
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

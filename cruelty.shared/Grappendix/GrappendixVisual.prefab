@@ -109,13 +109,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lumpPrefab: {fileID: 4570518786250108366, guid: deb8e54222eebfe4989d3fe4c6533fac, type: 3}
-  segmentSpacing: 0.15
-  scrollSpeed: 0
-  baseScale: 1
+  segmentSpacing: 0.14
+  baseScale: 0.8
   scaleVariation: 0.25
   scaleFrequency: 2
   scaleScrollSpeed: 8
+  slackFactorRate: 2.5
+  slackMaxAmplitude: 0.25
+  slackFrequency: 0.17
+  slackScrollSpeed: 22
   faceDirection: 1
   rotationOffset: {x: 0, y: 0, z: 0}
-  _pointGrapple: {x: 5.06, y: 0, z: 0}
+  _pointGrapple: {x: 11, y: 0, z: 0}
   _pointPlayer: {x: 0, y: 0, z: 0}

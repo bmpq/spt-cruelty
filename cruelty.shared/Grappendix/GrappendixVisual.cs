@@ -23,9 +23,10 @@ namespace tarkin.cruelty.player
         [SerializeField] private float scaleScrollSpeed = 6f;
 
         [Space(10)]
-        [SerializeField] private float slackFactorRate = 0.25f;
-        [SerializeField] private float slackMaxAmplitude = 0.25f;
-        [SerializeField] private float slackFrequency = 4f;
+        [SerializeField] private float slackFactorRate = 2f;
+        [SerializeField] private float slackMaxAmplitude = 0.4f;
+        [SerializeField] private float slackFrequency = 0.15f;
+        [SerializeField] private float slackScrollSpeed = 15f;
 
         [Space(10)]
         [SerializeField] private bool faceDirection = true;
@@ -39,6 +40,7 @@ namespace tarkin.cruelty.player
         [SerializeField] private Vector3 _pointGrapple;
         [SerializeField] private Vector3 _pointPlayer;
 
+        private float _currentSlackScroll;
         private float _currentSlackAmplitude;
         private GrappleState _state;
 
@@ -62,12 +64,14 @@ namespace tarkin.cruelty.player
             {
                 case GrappleState.Seeking:
                     _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, slackMaxAmplitude, slackFactorRate * Time.deltaTime);
+                    _currentSlackScroll -= Time.deltaTime * slackScrollSpeed;
                     break;
                 case GrappleState.Taut:
                     _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, 0f, slackFactorRate * 2f * Time.deltaTime);
                     break;
                 case GrappleState.Retracting:
                     _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, slackMaxAmplitude, slackFactorRate * Time.deltaTime);
+                    _currentSlackScroll += Time.deltaTime * slackScrollSpeed;
                     break;
             }
 
@@ -98,13 +102,28 @@ namespace tarkin.cruelty.player
                 Vector3 linearPos = start + direction * distanceAlongLine;
 
                 // -- looseness when not taut
-                float t = (float)i / lumps.Count;
-                float sineValue = Mathf.Sin(t * slackFrequency * Mathf.PI * 2f) * _currentSlackAmplitude;
+                float t = currentLength > 0f ? distanceAlongLine / currentLength : 0f; // 1.0 = player
+                float positionSlackModifier = 1f;
+                switch (_state)
+                {
+                    case GrappleState.Seeking:
+                        positionSlackModifier = t;
+                        break;
+                    case GrappleState.Retracting:
+                        positionSlackModifier = 1f - t;
+                        break;
+                    case GrappleState.Taut:
+                        positionSlackModifier = 1f;
+                        break;
+                }
+                if (t > 0.9f)
+                    positionSlackModifier *= Mathf.Lerp(1f, 0f ,Mathf.InverseLerp(0.9f, 1f, t));
+                float sineValue = Mathf.Sin(t * slackFrequency * Mathf.PI * 2f * currentLength + _currentSlackScroll) * _currentSlackAmplitude * positionSlackModifier;
                 Vector3 orthogonalDirection = Vector3.Cross(direction, Vector3.up).normalized;
                 Vector3 sineWavePoint = linearPos + orthogonalDirection * sineValue;
                 lump.position = sineWavePoint;
 
-                // -- scale variation
+                // -- scale variation (pulsating)
                 float wave =
                     Mathf.Sin(
                         (distanceAlongLine * scaleFrequency) -
