@@ -1,5 +1,8 @@
 ﻿using Comfort.Common;
 using EFT;
+using HarmonyLib;
+using SPT.Reflection.Patching;
+using System.Reflection;
 using Systems.Effects;
 using UnityEngine;
 
@@ -8,6 +11,7 @@ namespace tarkin.cruelty.player
     [DefaultExecutionOrder(100)] // probably not necessary
     public class PlayerGrapplingController : MonoBehaviour
     {
+        private static PlayerGrapplingController instance;
         private Player _player;
 
         public bool IsGrappling { get; private set; }
@@ -24,11 +28,15 @@ namespace tarkin.cruelty.player
         private Vector3 hookDirection;
         private float distanceTraveled;
 
+        private bool _shouldMuteMovementSounds;
+
         Transform cam;
         GrappendixVisual _visual;
 
         public void Init(Player player, GameObject prefabGrappendixVisual)
         {
+            instance = this;
+
             _player = player;
             cam = _player.PlayerBones.HeadCameraCollider.transform;
 
@@ -149,6 +157,9 @@ namespace tarkin.cruelty.player
             IsGrappling = true;
 
             RopeLength = Vector3.Distance(_player.Transform.position, point);
+
+            _shouldMuteMovementSounds = true;
+
             _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f); // skip land stumble if grapple start mid air
 
             _visual.gameObject.SetActive(true);
@@ -169,6 +180,8 @@ namespace tarkin.cruelty.player
             _visual.gameObject.SetActive(false);
 
             ApplyExitMomentum(_player.Velocity);
+
+            _shouldMuteMovementSounds = false;
         }
 
         void ApplyExitMomentum(Vector3 momentum)
@@ -189,6 +202,34 @@ namespace tarkin.cruelty.player
         {
             if (_visual != null)
                 Destroy(_visual.gameObject);
+
+            if (instance == this)
+                instance = null;
+        }
+
+        private static bool ShouldMuteMovementSounds(Player player)
+        {
+            if (instance == null)
+                return false;
+            if (player != instance._player)
+                return false;
+            return instance._shouldMuteMovementSounds;
+        }
+
+        internal class Patch_Player_StateChangedHandler : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod() 
+                => AccessTools.Method(typeof(Player), nameof(Player.method_55));
+            [PatchPrefix] private static bool PatchPrefix(Player __instance)
+                => !ShouldMuteMovementSounds(__instance);
+        }
+
+        internal class Patch_Player_PlayTurnSound : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod() 
+                => AccessTools.Method(typeof(Player), nameof(Player.method_62));
+            [PatchPrefix] static bool PatchPrefix(Player __instance) 
+                => !ShouldMuteMovementSounds(__instance);
         }
     }
 }
