@@ -30,7 +30,7 @@ namespace tarkin.cruelty.player
             float currentDistance = toTarget.magnitude;
             Vector3 directionToTarget = toTarget.normalized;
 
-            Vector3 currentVelocity = grapplingComp.GrappleMomentum;
+            Vector3 currentVelocity = __instance.Velocity;
 
             currentVelocity += Physics.gravity * deltaTime;
 
@@ -53,8 +53,6 @@ namespace tarkin.cruelty.player
 
             float drag = (1f - (0.5f * deltaTime));
             currentVelocity *= drag;
-
-            grapplingComp.GrappleMomentum = currentVelocity;
 
             motion = currentVelocity * deltaTime;
         }
