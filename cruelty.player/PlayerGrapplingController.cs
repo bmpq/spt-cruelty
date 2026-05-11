@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace tarkin.cruelty.player
 {
+    [DefaultExecutionOrder(100)] // probably not necessary
     public class PlayerGrapplingController : MonoBehaviour
     {
         private Player _player;
@@ -77,8 +78,6 @@ namespace tarkin.cruelty.player
             RopeLength = Vector3.Distance(_player.Transform.position, point);
             GrappleMomentum = _player.MovementContext.Velocity;
             _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f); // skip land stumble if grapple start mid air
-            _player.MovementContext.PlayerAnimator.Animator.Update(0.1f);
-
 
             _visual.gameObject.SetActive(true);
         }
@@ -96,23 +95,16 @@ namespace tarkin.cruelty.player
 
         void ApplyExitMomentum(Vector3 momentum)
         {
-            // JumpPlayerState to apply momentum checks if player input is non-zero
-            Vector2 inputDir = new Vector2(0, 1f);
-            _player.Move(inputDir);
-            _player.MovementContext.InputMotion = momentum;
-            _player.MovementContext.InputMotionBeforeLimit = inputDir;
+            _player.MovementContext.InputMotionBeforeLimit = momentum;
 
-            // JumpPlayerState to apply momentum also checks if previous state was Sprint
-            _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f);
-            _player.MovementContext.PlayerAnimator.Animator.Update(0.1f); // triggers all bsg state change logic immediately (to write MovementContext.PreviousState)
-
-            _player.MovementContext.PlayerAnimator.Animator.Play("Jump_Move", 0, 0f); // enter JumpPlayerState
-            _player.MovementContext.PlayerAnimator.Animator.Update(0.1f); // immediately
-
-            if (_player.MovementContext.CurrentState is JumpPlayerState jumpState)
+            if (_player.MovementContext.CurrentState is not SprintStateClass)
             {
-                jumpState.Vector3_0 = momentum; // _initialNormalizedDirection (originally calculates from input, I override with the custom value)
+                // JumpPlayerState to apply momentum checks if previous state was Sprint
+                _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f);
+                _player.MovementContext.PlayerAnimator.Animator.Update(0.1f); // triggers all bsg state change logic immediately (to write MovementContext.PreviousState)
             }
+
+            _player.MovementContext.PlayerAnimator.Animator.Play("Jump_Move", 0, 0f);
         }
 
         void OnDestroy()
