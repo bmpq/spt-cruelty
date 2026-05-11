@@ -8,8 +8,6 @@ namespace tarkin.cruelty.player
 {
     internal class Patch_MovementContext_DirectApplyMotion : ModulePatch
     {
-        static float originalSpeedLimit;
-
         protected override MethodBase GetTargetMethod()
         {
             return AccessTools.Method(typeof(MovementContext), nameof(MovementContext.DirectApplyMotion));
@@ -18,7 +16,6 @@ namespace tarkin.cruelty.player
         [PatchPrefix]
         static void Prefix(MovementContext __instance, ref Vector3 motion, float deltaTime, Player ____player)
         {
-            originalSpeedLimit = __instance.CharacterController.SpeedLimit;
             __instance.CharacterController.SpeedLimit = -1f;
 
             var grapplingComp = ____player.GetComponent<PlayerGrapplingController>();
@@ -55,15 +52,6 @@ namespace tarkin.cruelty.player
             currentVelocity *= drag;
 
             motion = currentVelocity * deltaTime;
-        }
-
-        [PatchPostfix]
-        static void Postfix(MovementContext __instance, Player ____player)
-        {
-            var grapplingComp = ____player.GetComponent<PlayerGrapplingController>();
-            if (grapplingComp == null || !grapplingComp.IsGrappling) return;
-
-            __instance.CharacterController.SpeedLimit = originalSpeedLimit;
         }
     }
 }

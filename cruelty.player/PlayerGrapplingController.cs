@@ -17,7 +17,7 @@ namespace tarkin.cruelty.player
         public float RopeLength { get; private set; }
 
         private KeyCode grappleKey = KeyCode.G;
-        private float maxGrappleDistance = 50f;
+        private float maxGrappleDistance = 70f;
 
         private float hookSpeed = 120f;
         private Vector3 currentHookPos;
@@ -52,14 +52,14 @@ namespace tarkin.cruelty.player
             {
                 float step = hookSpeed * Time.deltaTime;
 
-                bool tipHit = Physics.Raycast(currentHookPos, hookDirection, out RaycastHit tipHitInfo, step, LayerMaskController.HighPolyWithTerrainMask);
+                bool tipHit = Physics.Raycast(currentHookPos, hookDirection, out RaycastHit tipHitInfo, step, LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask);
 
                 Vector3 nextHookPos = tipHit ? tipHitInfo.point : currentHookPos + (hookDirection * step);
 
                 Vector3 ropeDir = nextHookPos - playerPoint;
                 float ropeDist = ropeDir.magnitude;
 
-                bool ropeHit = Physics.Raycast(playerPoint, ropeDir.normalized, out RaycastHit ropeHitInfo, ropeDist, LayerMaskController.HighPolyWithTerrainMask);
+                bool ropeHit = Physics.Raycast(playerPoint, ropeDir.normalized, out RaycastHit ropeHitInfo, ropeDist, LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask);
 
                 if (ropeHit)
                 {
@@ -102,7 +102,7 @@ namespace tarkin.cruelty.player
             {
                 float distToTarget = Vector3.Distance(playerPoint, GrappleTarget);
 
-                if (Physics.Raycast(playerPoint, (GrappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, LayerMaskController.HighPolyWithTerrainMask))
+                if (Physics.Raycast(playerPoint, (GrappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask))
                 {
                     GrappleTarget = hit.point;
                 }
