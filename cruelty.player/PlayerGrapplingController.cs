@@ -1,4 +1,6 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
+using Systems.Effects;
 using UnityEngine;
 
 namespace tarkin.cruelty.player
@@ -44,9 +46,9 @@ namespace tarkin.cruelty.player
                 Vector3 playerPoint = _player.PlayerBones.Pelvis.Original.position;
 
                 // obstacle check
-                if (Raycast(playerPoint, (GrappleTarget - playerPoint).normalized, out Vector3 hitPoint))
+                if (Physics.Raycast(playerPoint, (GrappleTarget - playerPoint).normalized, out RaycastHit hit, maxGrappleDistance, LayerMaskController.HighPolyWithTerrainMask))
                 {
-                    GrappleTarget = hitPoint;
+                    GrappleTarget = hit.point;
                 }
 
                 _player.MovementContext.ResetFlying();
@@ -66,9 +68,12 @@ namespace tarkin.cruelty.player
         {
             if (Input.GetKeyDown(grappleKey))
             {
-                if (Raycast(cam.position, cam.forward, out Vector3 hitPoint))
+                if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, maxGrappleDistance, LayerMaskController.HighPolyWithTerrainMask))
                 {
-                    StartGrapple(hitPoint);
+                    StartGrapple(hit.point);
+
+                    if (Singleton<Effects>.Instantiated)
+                        Singleton<Effects>.Instance.EmitBloodOnEnvironment(hit.point, hit.normal);
                 }
             }
 
@@ -77,19 +82,7 @@ namespace tarkin.cruelty.player
                 StopGrapple();
             }
         }
-
-        bool Raycast(Vector3 origin, Vector3 forward, out Vector3 hitPoint)
-        {
-            if (Physics.Raycast(origin, forward, out RaycastHit hit, maxGrappleDistance, LayerMaskController.HighPolyWithTerrainMask))
-            {
-                hitPoint = hit.point;
-                return true;
-            }
-
-            hitPoint = Vector3.zero;
-            return false;
-        }
-
+        
         private void StartGrapple(Vector3 point)
         {
             GrappleTarget = point;
