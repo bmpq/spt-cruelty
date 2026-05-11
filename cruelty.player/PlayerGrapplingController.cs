@@ -14,14 +14,11 @@ namespace tarkin.cruelty.player
         private static PlayerGrapplingController instance;
         private Player _player;
 
-        public bool IsGrappling => _state == GrappleState.Taut;
-
         private GrappleState _state;
 
-        public Vector3 GrappleTarget { get; private set; }
-        public float RopeLength { get; private set; }
+        private Vector3 grappleTarget;
+        private float ropeLength;
 
-        private KeyCode grappleKey = KeyCode.G;
         private float maxGrappleDistance = 70f;
 
         private float hookSpeed = 120f;
@@ -31,8 +28,8 @@ namespace tarkin.cruelty.player
 
         private bool _shouldMuteMovementSounds;
 
-        Transform cam;
-        GrappendixVisual _visual;
+        private Transform cam;
+        private GrappendixVisual _visual;
 
         public void Init(Player player, GameObject prefabGrappendixVisual)
         {
@@ -42,12 +39,13 @@ namespace tarkin.cruelty.player
             cam = _player.PlayerBones.HeadCameraCollider.transform;
 
             _visual = Instantiate(prefabGrappendixVisual).GetComponent<GrappendixVisual>();
-            _visual.gameObject.SetActive(false);
+
+            StopGrapple();
         }
 
         void Update()
         {
-            if (_player == null || !_player.IsYourPlayer)
+            if (_player == null || !_player.IsYourPlayer || !_player.ActiveHealthController.IsAlive)
             {
                 Destroy(this);
                 return;
@@ -107,11 +105,11 @@ namespace tarkin.cruelty.player
 
             if (_state == GrappleState.Taut)
             {
-                float distToTarget = Vector3.Distance(playerPoint, GrappleTarget);
+                float distToTarget = Vector3.Distance(playerPoint, grappleTarget);
 
-                if (Physics.Raycast(playerPoint, (GrappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask))
+                if (Physics.Raycast(playerPoint, (grappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask))
                 {
-                    GrappleTarget = hit.point;
+                    grappleTarget = hit.point;
                 }
 
                 _player.MovementContext.ResetFlying();
@@ -123,7 +121,7 @@ namespace tarkin.cruelty.player
                     _player.MovementContext.PlayerAnimatorEnableLanding(enabled: true);
                 }
 
-                _visual.SetPoints(GrappleTarget, playerPoint);
+                _visual.SetPoints(grappleTarget, playerPoint);
             }
         }
 
@@ -154,15 +152,49 @@ namespace tarkin.cruelty.player
         {
             _state = GrappleState.Taut;
 
-            GrappleTarget = point;
+            grappleTarget = point;
 
-            RopeLength = Vector3.Distance(_player.Transform.position, point);
+            ropeLength = Vector3.Distance(_player.Transform.position, point);
 
             _shouldMuteMovementSounds = true;
 
             _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f); // skip land stumble if grapple start mid air
 
             _visual.SetState(_state);
+        }
+
+        private void ApplyGrapplePhysics(MovementContext context, ref Vector3 motion, float deltaTime)
+        {
+            context.CharacterController.SpeedLimit = -1f;
+
+            Vector3 currentPos = context.TransformPosition;
+            Vector3 toTarget = this.grappleTarget - currentPos;
+            float currentDistance = toTarget.magnitude;
+            Vector3 directionToTarget = toTarget.normalized;
+
+            Vector3 currentVelocity = context.Velocity;
+            currentVelocity += Physics.gravity * deltaTime;
+
+            float reelSpeed = 25f;
+            currentVelocity += directionToTarget * reelSpeed * deltaTime;
+
+            if (currentDistance > this.ropeLength)
+            {
+                float stiffness = 23f;
+                float damping = 4f;
+
+                // F = -k * x
+                float stretch = currentDistance - this.ropeLength;
+                Vector3 springForce = directionToTarget * (stretch * stiffness);
+                Vector3 dampingForce = -currentVelocity * damping;
+
+                currentVelocity += (springForce + dampingForce) * deltaTime;
+            }
+
+            float drag = (1f - (0.5f * deltaTime));
+            currentVelocity *= drag;
+
+            motion = currentVelocity * deltaTime;
         }
 
         private void StopGrapple()
@@ -201,16 +233,31 @@ namespace tarkin.cruelty.player
                 instance = null;
         }
 
+        private class Patch_MovementContext_DirectApplyMotion : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                return AccessTools.Method(typeof(MovementContext), nameof(MovementContext.DirectApplyMotion));
+            }
+
+            [PatchPrefix]
+            static void Prefix(MovementContext __instance, ref Vector3 motion, float deltaTime, Player ____player)
+            {
+                if (instance == null || instance._player != ____player || instance._state != GrappleState.Taut)
+                    return;
+
+                instance.ApplyGrapplePhysics(__instance, ref motion, deltaTime);
+            }
+        }
+
         private static bool ShouldMuteMovementSounds(Player player)
         {
-            if (instance == null)
-                return false;
-            if (player != instance._player)
+            if (instance == null || instance._player != player)
                 return false;
             return instance._shouldMuteMovementSounds;
         }
 
-        internal class Patch_Player_StateChangedHandler : ModulePatch
+        private class Patch_Player_StateChangedHandler : ModulePatch
         {
             protected override MethodBase GetTargetMethod() 
                 => AccessTools.Method(typeof(Player), nameof(Player.method_55));
@@ -218,7 +265,7 @@ namespace tarkin.cruelty.player
                 => !ShouldMuteMovementSounds(__instance);
         }
 
-        internal class Patch_Player_PlayTurnSound : ModulePatch
+        private class Patch_Player_PlayTurnSound : ModulePatch
         {
             protected override MethodBase GetTargetMethod() 
                 => AccessTools.Method(typeof(Player), nameof(Player.method_62));
