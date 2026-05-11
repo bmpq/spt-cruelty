@@ -11,6 +11,8 @@ namespace tarkin.cruelty.player
         private Player _player;
 
         public bool IsGrappling { get; private set; }
+        public bool IsHookFlying { get; private set; }
+
         public Vector3 GrappleTarget { get; private set; }
         public Vector3 GrappleMomentum { get; set; }
         public float RopeLength { get; private set; }
@@ -18,8 +20,12 @@ namespace tarkin.cruelty.player
         private KeyCode grappleKey = KeyCode.G;
         private float maxGrappleDistance = 50f;
 
-        Transform cam;
+        private float hookSpeed = 120f;
+        private Vector3 currentHookPos;
+        private Vector3 hookDirection;
+        private float distanceTraveled;
 
+        Transform cam;
         GrappendixVisual _visual;
 
         public void Init(Player player, GameObject prefabGrappendixVisual)
@@ -41,12 +47,63 @@ namespace tarkin.cruelty.player
 
             HandleInput();
 
+            Vector3 playerPoint = _player.PlayerBones.Pelvis.Original.position;
+
+            if (IsHookFlying)
+            {
+                float step = hookSpeed * Time.deltaTime;
+
+                bool tipHit = Physics.Raycast(currentHookPos, hookDirection, out RaycastHit tipHitInfo, step, LayerMaskController.HighPolyWithTerrainMask);
+
+                Vector3 nextHookPos = tipHit ? tipHitInfo.point : currentHookPos + (hookDirection * step);
+
+                Vector3 ropeDir = nextHookPos - playerPoint;
+                float ropeDist = ropeDir.magnitude;
+
+                bool ropeHit = Physics.Raycast(playerPoint, ropeDir.normalized, out RaycastHit ropeHitInfo, ropeDist, LayerMaskController.HighPolyWithTerrainMask);
+
+                if (ropeHit)
+                {
+                    currentHookPos = ropeHitInfo.point;
+                    IsHookFlying = false;
+
+                    StartGrapple(currentHookPos);
+
+                    if (Singleton<Effects>.Instantiated)
+                        Singleton<Effects>.Instance.EmitBloodOnEnvironment(ropeHitInfo.point, ropeHitInfo.normal);
+                }
+                else if (tipHit)
+                {
+                    currentHookPos = tipHitInfo.point;
+                    IsHookFlying = false;
+
+                    StartGrapple(currentHookPos);
+
+                    if (Singleton<Effects>.Instantiated)
+                        Singleton<Effects>.Instance.EmitBloodOnEnvironment(tipHitInfo.point, tipHitInfo.normal);
+                }
+                else
+                {
+                    currentHookPos = nextHookPos;
+                    distanceTraveled += step;
+
+                    if (distanceTraveled >= maxGrappleDistance)
+                    {
+                        StopGrapple();
+                    }
+                }
+
+                if (IsHookFlying)
+                {
+                    _visual.SetPoints(currentHookPos, playerPoint);
+                }
+            }
+
             if (IsGrappling)
             {
-                Vector3 playerPoint = _player.PlayerBones.Pelvis.Original.position;
+                float distToTarget = Vector3.Distance(playerPoint, GrappleTarget);
 
-                // obstacle check
-                if (Physics.Raycast(playerPoint, (GrappleTarget - playerPoint).normalized, out RaycastHit hit, maxGrappleDistance, LayerMaskController.HighPolyWithTerrainMask))
+                if (Physics.Raycast(playerPoint, (GrappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, LayerMaskController.HighPolyWithTerrainMask))
                 {
                     GrappleTarget = hit.point;
                 }
@@ -68,13 +125,7 @@ namespace tarkin.cruelty.player
         {
             if (Input.GetKeyDown(grappleKey))
             {
-                if (Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, maxGrappleDistance, LayerMaskController.HighPolyWithTerrainMask))
-                {
-                    StartGrapple(hit.point);
-
-                    if (Singleton<Effects>.Instantiated)
-                        Singleton<Effects>.Instance.EmitBloodOnEnvironment(hit.point, hit.normal);
-                }
+                StartHookFlight();
             }
 
             if (Input.GetKeyUp(grappleKey))
@@ -82,7 +133,17 @@ namespace tarkin.cruelty.player
                 StopGrapple();
             }
         }
-        
+
+        private void StartHookFlight()
+        {
+            hookDirection = cam.forward;
+            currentHookPos = cam.position;
+            distanceTraveled = 0f;
+
+            IsHookFlying = true;
+            _visual.gameObject.SetActive(true);
+        }
+
         private void StartGrapple(Vector3 point)
         {
             GrappleTarget = point;
@@ -97,6 +158,12 @@ namespace tarkin.cruelty.player
 
         private void StopGrapple()
         {
+            if (IsHookFlying)
+            {
+                IsHookFlying = false;
+                _visual.gameObject.SetActive(false);
+            }
+
             if (!IsGrappling)
                 return;
             IsGrappling = false;
