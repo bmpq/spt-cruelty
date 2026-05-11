@@ -21,6 +21,7 @@ namespace tarkin.cruelty.player
         private PatchManager _patchManager;
 
         internal static ConfigEntry<KeyboardShortcut> KeybindGrapple;
+        internal static ConfigEntry<bool> FallDamageImmunity;
 
         void Start()
         {
@@ -30,6 +31,7 @@ namespace tarkin.cruelty.player
             _patchManager.EnablePatches();
 
             KeybindGrapple = Config.Bind("Keybinds", "Keybind Grapple", new KeyboardShortcut(KeyCode.G));
+            FallDamageImmunity = Config.Bind("", "FallDamageImmunity", false);
 
             Patch_GameWorld_OnGameStarted.OnPostfix += Init;
             if (Singleton<GameWorld>.Instantiated)

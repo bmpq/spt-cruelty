@@ -8,4 +8,5 @@ global using InteractionContextHelper = GetActionsClass;
 global using IInteractive = GInterface177;
 global using InteractionAction = ActionsTypesClass;
 global using AvailableInteractionState = ActionsReturnClass;
+global using DamageInfo = DamageInfoStruct;
 #endif
