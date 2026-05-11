@@ -41,6 +41,14 @@ namespace tarkin.cruelty.player
 
             if (IsGrappling)
             {
+                Vector3 playerPoint = _player.PlayerBones.Pelvis.Original.position;
+
+                // obstacle check
+                if (Raycast(playerPoint, (GrappleTarget - playerPoint).normalized, out Vector3 hitPoint))
+                {
+                    GrappleTarget = hitPoint;
+                }
+
                 _player.MovementContext.ResetFlying();
                 _player.MovementContext.FreefallTime = 0;
 
@@ -50,7 +58,7 @@ namespace tarkin.cruelty.player
                     _player.MovementContext.PlayerAnimatorEnableLanding(enabled: true);
                 }
 
-                _visual.SetPoints(GrappleTarget, _player.PlayerBones.Pelvis.Original.position);
+                _visual.SetPoints(GrappleTarget, playerPoint);
             }
         }
 
@@ -58,9 +66,9 @@ namespace tarkin.cruelty.player
         {
             if (Input.GetKeyDown(grappleKey))
             {
-                if (cam != null && Physics.Raycast(cam.position, cam.forward, out RaycastHit hit, maxGrappleDistance, LayerMaskController.HighPolyWithTerrainMask))
+                if (Raycast(cam.position, cam.forward, out Vector3 hitPoint))
                 {
-                    StartGrapple(hit.point);
+                    StartGrapple(hitPoint);
                 }
             }
 
@@ -68,6 +76,18 @@ namespace tarkin.cruelty.player
             {
                 StopGrapple();
             }
+        }
+
+        bool Raycast(Vector3 origin, Vector3 forward, out Vector3 hitPoint)
+        {
+            if (Physics.Raycast(origin, forward, out RaycastHit hit, maxGrappleDistance, LayerMaskController.HighPolyWithTerrainMask))
+            {
+                hitPoint = hit.point;
+                return true;
+            }
+
+            hitPoint = Vector3.zero;
+            return false;
         }
 
         private void StartGrapple(Vector3 point)
