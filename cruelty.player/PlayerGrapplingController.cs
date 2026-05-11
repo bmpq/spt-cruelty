@@ -173,6 +173,7 @@ namespace tarkin.cruelty.player
             ropeLength = Vector3.Distance(_player.Transform.position, point);
 
             _audioManager.shouldMuteMovementSounds = true;
+            _audioManager.PlayHitAudio(point);
 
             _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f); // skip land stumble if grapple start mid air
 

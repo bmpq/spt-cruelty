@@ -1,16 +1,22 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 namespace tarkin.cruelty.player
 {
     internal class PlayerGrapplingAudioManager : IDisposable
     {
+        private static readonly FieldInfo Field_Player__soundBySurface = AccessTools.Field(typeof(Player), "_soundBySurface");
+
         private static PlayerGrapplingAudioManager instance;
 
-        readonly Player _player;
+        private readonly Player _player;
+        private readonly SurfaceSet wetSurfaceSet;
 
         public bool shouldMuteMovementSounds { get; set; }
 
@@ -18,6 +24,17 @@ namespace tarkin.cruelty.player
         {
             instance = this;
             _player = player;
+
+            var allSurfaces = Field_Player__soundBySurface.GetValue(player) as Dictionary<BaseBallistic.ESurfaceSound, SurfaceSet>;
+            wetSurfaceSet = allSurfaces[BaseBallistic.ESurfaceSound.Puddle];
+        }
+
+        public void PlayHitAudio(Vector3 point)
+        {
+            if (!Singleton<BetterAudio>.Instantiated || !CameraManager.Exist || CameraManager.Instance.Camera == null)
+                return;
+
+            Singleton<BetterAudio>.Instance.PlayAtPoint(point, wetSurfaceSet.LandingSoundBank, CameraManager.Instance.Distance(point));
         }
 
         public void Dispose()

@@ -3,4 +3,5 @@ global using LayerMaskController = LayerMaskClass;
 global using JumpPlayerState = JumpStateClass;
 global using SprintPlayerState = SprintStateClass;
 global using NotificationManager = NotificationManagerClass;
+global using CameraManager = CameraClass;
 #endif
