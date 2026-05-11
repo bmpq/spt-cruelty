@@ -130,12 +130,12 @@ namespace tarkin.cruelty.player
 
         private void HandleInput()
         {
-            if (Input.GetKeyDown(grappleKey))
+            if (Input.GetKeyDown(Plugin.KeybindGrapple.Value.MainKey))
             {
                 StartHookFlight();
             }
 
-            if (Input.GetKeyUp(grappleKey))
+            if (Input.GetKeyUp(Plugin.KeybindGrapple.Value.MainKey))
             {
                 StopGrapple();
             }

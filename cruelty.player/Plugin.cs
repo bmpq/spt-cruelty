@@ -1,4 +1,5 @@
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
@@ -19,12 +20,16 @@ namespace tarkin.cruelty.player
 
         private PatchManager _patchManager;
 
+        internal static ConfigEntry<KeyboardShortcut> KeybindGrapple;
+
         void Start()
         {
             Logger = base.Logger;
 
             _patchManager = new PatchManager(this, autoPatch: true);
             _patchManager.EnablePatches();
+
+            KeybindGrapple = Config.Bind("Keybinds", "Keybind Grapple", new KeyboardShortcut(KeyCode.G));
 
             Patch_GameWorld_OnGameStarted.OnPostfix += Init;
             if (Singleton<GameWorld>.Instantiated)
