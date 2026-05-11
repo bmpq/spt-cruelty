@@ -28,7 +28,7 @@ namespace tarkin.cruelty.player
         private Vector3 hookDirection;
         private float distanceTraveled;
 
-        private bool _shouldMuteMovementSounds;
+        private PlayerGrapplingAudioManager _audioManager;
 
         private Transform cam;
         private GrappendixVisual _visual;
@@ -43,6 +43,8 @@ namespace tarkin.cruelty.player
             _player.OnPlayerDead += OnPlayerDead;
 
             _visual = Instantiate(prefabGrappendixVisual).GetComponent<GrappendixVisual>();
+
+            _audioManager = new PlayerGrapplingAudioManager(_player);
 
             StopGrapple();
         }
@@ -170,7 +172,7 @@ namespace tarkin.cruelty.player
 
             ropeLength = Vector3.Distance(_player.Transform.position, point);
 
-            _shouldMuteMovementSounds = true;
+            _audioManager.shouldMuteMovementSounds = true;
 
             _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f); // skip land stumble if grapple start mid air
 
@@ -222,7 +224,7 @@ namespace tarkin.cruelty.player
 
             _state = GrappleState.Retracting;
 
-            _shouldMuteMovementSounds = false;
+            _audioManager.shouldMuteMovementSounds = false;
             _visual.SetState(_state);
         }
 
@@ -238,6 +240,7 @@ namespace tarkin.cruelty.player
             }
 
             _player.MovementContext.PlayerAnimator.Animator.Play("Jump_Move", 0, 0f);
+            _player.MovementContext.PlayerAnimator.Animator.Update(0.1f);
         }
 
         void OnDestroy()
@@ -247,6 +250,8 @@ namespace tarkin.cruelty.player
 
             if (_player != null)
                 _player.OnPlayerDead -= OnPlayerDead;
+
+            _audioManager?.Dispose();
 
             if (instance == this)
                 instance = null;
@@ -267,29 +272,6 @@ namespace tarkin.cruelty.player
 
                 instance.ApplyGrapplePhysics(__instance, ref motion, deltaTime);
             }
-        }
-
-        private static bool ShouldMuteMovementSounds(Player player)
-        {
-            if (instance == null || instance._player != player)
-                return false;
-            return instance._shouldMuteMovementSounds;
-        }
-
-        private class Patch_Player_StateChangedHandler : ModulePatch
-        {
-            protected override MethodBase GetTargetMethod() 
-                => AccessTools.Method(typeof(Player), nameof(Player.method_55));
-            [PatchPrefix] private static bool PatchPrefix(Player __instance)
-                => !ShouldMuteMovementSounds(__instance);
-        }
-
-        private class Patch_Player_PlayTurnSound : ModulePatch
-        {
-            protected override MethodBase GetTargetMethod() 
-                => AccessTools.Method(typeof(Player), nameof(Player.method_62));
-            [PatchPrefix] static bool PatchPrefix(Player __instance) 
-                => !ShouldMuteMovementSounds(__instance);
         }
     }
 }
