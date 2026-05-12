@@ -1,15 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace tarkin.cruelty.player
+namespace tarkin.cruelty.shared
 {
-    public enum GrappleState
-    {
-        Seeking,
-        Taut,
-        Retracting
-    }
-
     public class GrappendixVisual : MonoBehaviour
     {
         [SerializeField] private GameObject lumpPrefab;

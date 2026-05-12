@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace tarkin.cruelty.player
+namespace tarkin.cruelty.shared
 {
     public class GrappendixVisualEditorTester : MonoBehaviour
     {

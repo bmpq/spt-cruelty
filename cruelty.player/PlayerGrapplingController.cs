@@ -2,9 +2,11 @@
 using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
+using System;
 using System.Reflection;
 using Systems.Effects;
 using UnityEngine;
+using tarkin.cruelty.shared;
 
 namespace tarkin.cruelty.player
 {
@@ -24,6 +26,7 @@ namespace tarkin.cruelty.player
         private float maxGrappleDistance = 70f;
 
         private float hookSpeed = 120f;
+        private float retractSpeed = 70f;
         private Vector3 currentHookPos;
         private Vector3 hookDirection;
         private float distanceTraveled;
@@ -32,6 +35,16 @@ namespace tarkin.cruelty.player
 
         private Transform cam;
         private GrappendixVisual _visual;
+
+        public delegate void OnGrappleShot(Player player, Vector3 direction, float speed);
+        public delegate void OnGrappleHit(Player player, Vector3 point);
+        public delegate void OnGrapplePivotChanged(Player player, Vector3 point);
+        public delegate void OnGrappleRetract(Player player, float speed);
+
+        public event OnGrappleShot OnShot;
+        public event OnGrappleHit OnHit;
+        public event OnGrapplePivotChanged OnPivotChanged;
+        public event OnGrappleRetract OnRetract;
 
         public void Init(Player player, GameObject prefabGrappendixVisual)
         {
@@ -118,6 +131,7 @@ namespace tarkin.cruelty.player
                 if (Physics.Raycast(playerPoint, (grappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, collisionMask))
                 {
                     grappleTarget = hit.point;
+                    OnPivotChanged?.Invoke(_player, grappleTarget);
                 }
 
                 _player.MovementContext.ResetFlying();
@@ -134,7 +148,7 @@ namespace tarkin.cruelty.player
 
             if (_state == GrappleState.Retracting)
             {
-                currentHookPos = Vector3.MoveTowards(currentHookPos, playerPoint, Time.deltaTime * hookSpeed * 0.5f);
+                currentHookPos = Vector3.MoveTowards(currentHookPos, playerPoint, retractSpeed * Time.deltaTime);
                 _visual.SetPoints(currentHookPos, playerPoint);
             }
         }
@@ -159,9 +173,12 @@ namespace tarkin.cruelty.player
             distanceTraveled = 0f;
 
             _state = GrappleState.Seeking;
+
             _visual.SetState(GrappleState.Seeking);
 
             _player.ProceduralWeaponAnimation.ForceReact.AddForce(new Vector3(-1f, 0, 0), 0.1f, 0.2f, 1f);
+
+            OnShot?.Invoke(_player, hookDirection, hookSpeed);
         }
 
         private void StartGrapple(Vector3 point)
@@ -180,6 +197,8 @@ namespace tarkin.cruelty.player
             _visual.SetState(_state);
 
             _player.ProceduralWeaponAnimation.ForceReact.AddForce(1f, 0.1f, 0.2f);
+
+            OnHit?.Invoke(_player, point);
         }
 
         private void ApplyGrapplePhysics(MovementContext context, ref Vector3 motion, float deltaTime)
@@ -227,6 +246,8 @@ namespace tarkin.cruelty.player
 
             _audioManager.shouldMuteMovementSounds = false;
             _visual.SetState(_state);
+
+            OnRetract?.Invoke(_player, retractSpeed);
         }
 
         void ApplyExitMomentum(Vector3 momentum)

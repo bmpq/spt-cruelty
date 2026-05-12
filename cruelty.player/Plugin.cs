@@ -1,4 +1,5 @@
 using BepInEx;
+using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using Comfort.Common;
@@ -9,6 +10,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using tarkin.cruelty.fika;
 using UnityEngine;
 
 namespace tarkin.cruelty.player
@@ -23,9 +25,13 @@ namespace tarkin.cruelty.player
         internal static ConfigEntry<KeyboardShortcut> KeybindGrapple;
         internal static ConfigEntry<bool> FallDamageImmunity;
 
+        private GameObject _prefabGrappendixVisual;
+        private IDisposable _fika;
+
         void Start()
         {
-            Logger = base.Logger;
+            Logger = new EFTLogger("crPl", () => true);
+            BepInEx.Logging.Logger.Sources.Add(Logger);
 
             _patchManager = new PatchManager(this, autoPatch: true);
             _patchManager.EnablePatches();
@@ -33,25 +39,34 @@ namespace tarkin.cruelty.player
             KeybindGrapple = Config.Bind("Keybinds", "Keybind Grapple", new KeyboardShortcut(KeyCode.G));
             FallDamageImmunity = Config.Bind("", "FallDamageImmunity", false);
 
+            string bundlePath = Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty", "cruelty-world");
+            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
+            GameObject[] allPrefabs = bundle.LoadAllAssets<GameObject>();
+            _prefabGrappendixVisual = allPrefabs.First(p => p.name == "GrappendixVisual");
+            bundle.Unload(false);
+
             Patch_GameWorld_OnGameStarted.OnPostfix += Init;
             if (Singleton<GameWorld>.Instantiated)
             {
                 Init(Singleton<GameWorld>.Instance);
             }
+
+            if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+                _fika = new FikaHandler(_prefabGrappendixVisual);
         }
 
         void Init(GameWorld gameWorld)
         {
-            string bundlePath = Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty", "cruelty-world");
-            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
-
-            GameObject[] allPrefabs = bundle.LoadAllAssets<GameObject>();
-            GameObject prefabGrappendixVisual = allPrefabs.First(p => p.name == "GrappendixVisual");
-
             Player mainPlayer = gameWorld.MainPlayer;
-            mainPlayer.gameObject.AddComponent<PlayerGrapplingController>().Init(mainPlayer, prefabGrappendixVisual);
-
-            bundle.Unload(false);
+            PlayerGrapplingController controller = mainPlayer.gameObject.AddComponent<PlayerGrapplingController>();
+            controller.Init(mainPlayer, _prefabGrappendixVisual);
+            if (_fika != null && _fika is FikaHandler fikaHandler)
+            {
+                controller.OnShot += fikaHandler.SendGrappleShot;
+                controller.OnHit += fikaHandler.SendGrappleHit;
+                controller.OnPivotChanged += fikaHandler.SendGrapplePivotChanged;
+                controller.OnRetract += fikaHandler.SendGrappleRetract;
+            }
         }
 
         void OnDestroy()
@@ -62,6 +77,10 @@ namespace tarkin.cruelty.player
 
             _patchManager.DisablePatches();
             _patchManager = null;
+
+            _fika?.Dispose();
+
+            BepInEx.Logging.Logger.Sources.Remove(Logger);
         }
 
         static void FindObjectsByTypeAndDestroy<T>() where T : Component
