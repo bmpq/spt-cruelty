@@ -25,7 +25,6 @@ namespace tarkin.cruelty.player
         internal static ConfigEntry<KeyboardShortcut> KeybindGrapple;
         internal static ConfigEntry<bool> FallDamageImmunity;
 
-        private GameObject _prefabGrappendixVisual;
         private IDisposable _fika;
 
         void Start()
@@ -39,12 +38,6 @@ namespace tarkin.cruelty.player
             KeybindGrapple = Config.Bind("Keybinds", "Keybind Grapple", new KeyboardShortcut(KeyCode.G));
             FallDamageImmunity = Config.Bind("", "FallDamageImmunity", false);
 
-            string bundlePath = Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty", "cruelty-world");
-            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
-            GameObject[] allPrefabs = bundle.LoadAllAssets<GameObject>();
-            _prefabGrappendixVisual = allPrefabs.First(p => p.name == "GrappendixVisual");
-            bundle.Unload(false);
-
             Patch_GameWorld_OnGameStarted.OnPostfix += Init;
             if (Singleton<GameWorld>.Instantiated)
             {
@@ -52,16 +45,23 @@ namespace tarkin.cruelty.player
             }
 
             if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
-                _fika = new FikaHandler(_prefabGrappendixVisual);
+                _fika = new FikaHandler();
         }
 
         void Init(GameWorld gameWorld)
         {
+            string bundlePath = Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty", "cruelty-world");
+            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
+            GameObject[] allPrefabs = bundle.LoadAllAssets<GameObject>();
+            GameObject prefabGrappendixVisual = allPrefabs.First(p => p.name == "GrappendixVisual");
+            bundle.Unload(false);
+
             Player mainPlayer = gameWorld.MainPlayer;
             PlayerGrapplingController controller = mainPlayer.gameObject.AddComponent<PlayerGrapplingController>();
-            controller.Init(mainPlayer, _prefabGrappendixVisual);
+            controller.Init(mainPlayer, prefabGrappendixVisual);
             if (_fika != null && _fika is FikaHandler fikaHandler)
             {
+                fikaHandler.PrefabGrappendixVisual = prefabGrappendixVisual;
                 controller.OnShot += fikaHandler.SendGrappleShot;
                 controller.OnHit += fikaHandler.SendGrappleHit;
                 controller.OnPivotChanged += fikaHandler.SendGrapplePivotChanged;

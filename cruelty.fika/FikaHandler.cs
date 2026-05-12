@@ -14,12 +14,10 @@ namespace tarkin.cruelty.fika
     {
         private object _eventFikaCreated;
 
-        private GameObject _prefabGrappendixVisual;
+        public GameObject PrefabGrappendixVisual { get; set; }
 
-        public FikaHandler(GameObject prefabGrappendixVisual)
+        public FikaHandler()
         {
-            _prefabGrappendixVisual = prefabGrappendixVisual;
-
             _eventFikaCreated = new Action<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>((Action<FikaNetworkManagerCreatedEvent>)_eventFikaCreated);
         }
@@ -117,7 +115,7 @@ namespace tarkin.cruelty.fika
             if (!player.TryGetComponent<ObservedPlayerGrapplingController>(out observedController))
             {
                 observedController = player.gameObject.AddComponent<ObservedPlayerGrapplingController>();
-                observedController.Init(player, _prefabGrappendixVisual);
+                observedController.Init(player, PrefabGrappendixVisual);
             }
 
             return true;
