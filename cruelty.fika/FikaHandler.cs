@@ -1,6 +1,7 @@
 using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Components;
+using Fika.Core.Main.Players;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
@@ -33,7 +34,7 @@ namespace tarkin.cruelty.fika
         {
             var packet = new GrappleShotPacket()
             {
-                playerId = player.PlayerId,
+                netId = (player as FikaPlayer).NetId,
                 direction = direction,
                 speed = speed
             };
@@ -44,7 +45,7 @@ namespace tarkin.cruelty.fika
         {
             var packet = new GrappleHitPacket()
             {
-                playerId = player.PlayerId,
+                netId = (player as FikaPlayer).NetId,
                 hitPoint = point,
                 first = true
             };
@@ -55,7 +56,7 @@ namespace tarkin.cruelty.fika
         {
             var packet = new GrappleHitPacket()
             {
-                playerId = player.PlayerId,
+                netId = (player as FikaPlayer).NetId,
                 hitPoint = point,
                 first = false
             };
@@ -66,7 +67,7 @@ namespace tarkin.cruelty.fika
         {
             var packet = new GrappleRetractPacket()
             {
-                playerId = player.PlayerId,
+                netId = (player as FikaPlayer).NetId,
                 speed = speed
             };
             Singleton<IFikaNetworkManager>.Instance?.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
@@ -74,7 +75,7 @@ namespace tarkin.cruelty.fika
 
         private void OnGrappleShotPacketReceived(GrappleShotPacket packet)
         {
-            if (!TryGetController(packet.playerId, out var observedController))
+            if (!TryGetController(packet.netId, out var observedController))
                 return;
 
             observedController.Shoot(packet.direction, packet.speed);
@@ -82,7 +83,7 @@ namespace tarkin.cruelty.fika
 
         private void OnGrappleHitPacketReceived(GrappleHitPacket packet)
         {
-            if (!TryGetController(packet.playerId, out var observedController))
+            if (!TryGetController(packet.netId, out var observedController))
                 return;
 
             if (packet.first)
@@ -93,7 +94,7 @@ namespace tarkin.cruelty.fika
 
         private void OnGrappleRetractPacketReceived(GrappleRetractPacket packet)
         {
-            if (!TryGetController(packet.playerId, out var observedController))
+            if (!TryGetController(packet.netId, out var observedController))
                 return;
 
             observedController.Retract(packet.speed);
