@@ -31,7 +31,7 @@ namespace tarkin.cruelty.player
         private Vector3 hookDirection;
         private float distanceTraveled;
 
-        private PlayerGrapplingAudioManager _audioManager;
+        private PlayerMovementSoundMute _movementSoundMute;
 
         private Transform cam;
         private GrapplingView _view;
@@ -57,7 +57,7 @@ namespace tarkin.cruelty.player
 
             _view = new GrapplingView(player, prefabGrappendixVisual);
 
-            _audioManager = new PlayerGrapplingAudioManager(_player);
+            _movementSoundMute = new PlayerMovementSoundMute(_player);
         }
 
         private void OnPlayerDead(Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part) => Destroy(this);
@@ -184,8 +184,7 @@ namespace tarkin.cruelty.player
 
             ropeLength = Vector3.Distance(_player.Transform.position, point);
 
-            _audioManager.shouldMuteMovementSounds = true;
-            _audioManager.PlayHitAudio(point);
+            _movementSoundMute.shouldMuteMovementSounds = true;
 
             _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f); // skip land stumble if grapple start mid air
 
@@ -239,7 +238,7 @@ namespace tarkin.cruelty.player
 
             _state = GrappleState.Retracting;
 
-            _audioManager.shouldMuteMovementSounds = false;
+            _movementSoundMute.shouldMuteMovementSounds = false;
             _view.Retract(retractSpeed);
 
             OnRetract?.Invoke(_player, retractSpeed);
@@ -267,7 +266,7 @@ namespace tarkin.cruelty.player
             if (_player != null)
                 _player.OnPlayerDead -= OnPlayerDead;
 
-            _audioManager?.Dispose();
+            _movementSoundMute?.Dispose();
 
             if (instance == this)
                 instance = null;
