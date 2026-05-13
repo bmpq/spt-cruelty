@@ -90,6 +90,7 @@ namespace tarkin.cruelty.bep.ui
             _disposables.Add(new CrueltyAdapterNotifier(prefabNotifier, MonoBehaviourSingleton<PreloaderUI>.Instance));
             _disposables.Add(new CrueltyAdapterInventoryHealth(commonUI, prefabInventoryHealth));
             _disposables.Add(new CrueltyAdapterInventory(commonUI, spriteGridCell, spriteUnsearchedFill));
+            _disposables.Add(new CrueltyKillFeed(currentBattleUIPlayerOwner));
         }
 
         void OnPlayerOwnerChanged(GamePlayerOwner playerOwner)

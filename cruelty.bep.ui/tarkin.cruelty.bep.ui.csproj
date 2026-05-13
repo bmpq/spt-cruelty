@@ -36,6 +36,9 @@
     <Reference Include="$(SPTPath)\EscapeFromTarkov_Data\Managed\Comfort.dll">
       <Private>False</Private>
     </Reference>
+    <Reference Include="$(SPTPath)\EscapeFromTarkov_Data\Managed\DissonanceVoip.dll">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="$(SPTPath)\EscapeFromTarkov_Data\Managed\Sirenix.Serialization.dll">
       <Private>False</Private>
     </Reference>
