@@ -3,9 +3,14 @@ using UnityEngine;
 using tarkin.cruelty.shared;
 using Comfort.Common;
 using Systems.Effects;
+using System.Reflection;
+using HarmonyLib;
+using System.Collections.Generic;
+
 
 #if SPT_4_0
 using LayerMaskController = LayerMaskClass;
+using CameraManager = CameraClass;
 #endif
 
 namespace tarkin.cruelty.fika
@@ -27,10 +32,17 @@ namespace tarkin.cruelty.fika
         Vector3 playerPoint => _player.PlayerBones.Pelvis.position;
         private readonly LayerMask collisionMask = LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask;
 
+
+        private static readonly FieldInfo Field_Player__soundBySurface = AccessTools.Field(typeof(Player), "_soundBySurface");
+        private SurfaceSet wetSurfaceSet;
+
         internal void Init(Player player, GameObject prefabGrappendixVisual)
         {
             _player = player;
             _visual = GameObject.Instantiate(prefabGrappendixVisual, transform).GetComponent<GrappendixVisual>();
+
+            var allSurfaces = Field_Player__soundBySurface.GetValue(player) as Dictionary<BaseBallistic.ESurfaceSound, SurfaceSet>;
+            wetSurfaceSet = allSurfaces[BaseBallistic.ESurfaceSound.Puddle];
         }
 
         internal void Shoot(Vector3 direction, float speed)
@@ -62,6 +74,16 @@ namespace tarkin.cruelty.fika
                     Singleton<Effects>.Instance.EmitBloodOnEnvironment(hitInfo.point, hitInfo.normal);
                 }
             }
+
+            PlayHitAudio(hitPoint);
+        }
+
+        void PlayHitAudio(Vector3 point)
+        {
+            if (!Singleton<BetterAudio>.Instantiated || !CameraManager.Exist || CameraManager.Instance.Camera == null)
+                return;
+
+            Singleton<BetterAudio>.Instance.PlayAtPoint(point, wetSurfaceSet.LandingSoundBank, CameraManager.Instance.Distance(point));
         }
 
         internal void ChangePivot(Vector3 hitPoint)
