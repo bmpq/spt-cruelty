@@ -34,7 +34,7 @@ namespace tarkin.cruelty.player
         private PlayerGrapplingAudioManager _audioManager;
 
         private Transform cam;
-        private GrappendixVisual _visual;
+        private GrapplingView _view;
 
         public delegate void OnGrappleShot(Player player, Vector3 direction, float speed);
         public delegate void OnGrappleHit(Player player, Vector3 point);
@@ -55,7 +55,7 @@ namespace tarkin.cruelty.player
 
             _player.OnPlayerDead += OnPlayerDead;
 
-            _visual = Instantiate(prefabGrappendixVisual).GetComponent<GrappendixVisual>();
+            _view = new GrapplingView(player, prefabGrappendixVisual);
 
             _audioManager = new PlayerGrapplingAudioManager(_player);
 
@@ -93,7 +93,7 @@ namespace tarkin.cruelty.player
                 {
                     currentHookPos = ropeHitInfo.point;
 
-                    StartGrapple(currentHookPos);
+                    StartGrapple(currentHookPos, ropeHitInfo.normal);
 
                     if (Singleton<Effects>.Instantiated)
                         Singleton<Effects>.Instance.EmitBloodOnEnvironment(ropeHitInfo.point, ropeHitInfo.normal);
@@ -102,7 +102,7 @@ namespace tarkin.cruelty.player
                 {
                     currentHookPos = tipHitInfo.point;
 
-                    StartGrapple(currentHookPos);
+                    StartGrapple(currentHookPos, tipHitInfo.normal);
 
                     if (Singleton<Effects>.Instantiated)
                         Singleton<Effects>.Instance.EmitBloodOnEnvironment(tipHitInfo.point, tipHitInfo.normal);
@@ -118,10 +118,7 @@ namespace tarkin.cruelty.player
                     }
                 }
 
-                if (_state == GrappleState.Seeking)
-                {
-                    _visual.SetPoints(currentHookPos, playerPoint);
-                }
+                _view.OverwriteHookPos(nextHookPos);
             }
 
             if (_state == GrappleState.Taut)
@@ -131,6 +128,7 @@ namespace tarkin.cruelty.player
                 if (Physics.Raycast(playerPoint, (grappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, collisionMask))
                 {
                     grappleTarget = hit.point;
+                    _view.ChangePivot(grappleTarget);
                     OnPivotChanged?.Invoke(_player, grappleTarget);
                 }
 
@@ -142,15 +140,14 @@ namespace tarkin.cruelty.player
                     _player.MovementContext.PlayerAnimatorEnableJump(enabled: false);
                     _player.MovementContext.PlayerAnimatorEnableLanding(enabled: true);
                 }
-
-                _visual.SetPoints(grappleTarget, playerPoint);
             }
 
             if (_state == GrappleState.Retracting)
             {
                 currentHookPos = Vector3.MoveTowards(currentHookPos, playerPoint, retractSpeed * Time.deltaTime);
-                _visual.SetPoints(currentHookPos, playerPoint);
             }
+
+            _view.TickVisuals(_player.PlayerBones.Pelvis.position);
         }
 
         private void HandleInput()
@@ -174,14 +171,14 @@ namespace tarkin.cruelty.player
 
             _state = GrappleState.Seeking;
 
-            _visual.SetState(GrappleState.Seeking);
+            _view.Shoot(cam.position, cam.forward, hookSpeed);
 
             _player.ProceduralWeaponAnimation.ForceReact.AddForce(new Vector3(-1f, 0, 0), 0.1f, 0.2f, 1f);
 
             OnShot?.Invoke(_player, hookDirection, hookSpeed);
         }
 
-        private void StartGrapple(Vector3 point)
+        private void StartGrapple(Vector3 point, Vector3 normal)
         {
             _state = GrappleState.Taut;
 
@@ -194,7 +191,7 @@ namespace tarkin.cruelty.player
 
             _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f); // skip land stumble if grapple start mid air
 
-            _visual.SetState(_state);
+            _view.Hit(point, normal);
 
             _player.ProceduralWeaponAnimation.ForceReact.AddForce(1f, 0.1f, 0.2f);
 
@@ -245,7 +242,7 @@ namespace tarkin.cruelty.player
             _state = GrappleState.Retracting;
 
             _audioManager.shouldMuteMovementSounds = false;
-            _visual.SetState(_state);
+            _view.Retract(retractSpeed);
 
             OnRetract?.Invoke(_player, retractSpeed);
         }
@@ -267,8 +264,7 @@ namespace tarkin.cruelty.player
 
         void OnDestroy()
         {
-            if (_visual != null)
-                Destroy(_visual.gameObject);
+            _view?.Dispose();
 
             if (_player != null)
                 _player.OnPlayerDead -= OnPlayerDead;

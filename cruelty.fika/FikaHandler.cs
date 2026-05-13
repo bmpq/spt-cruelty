@@ -14,9 +14,12 @@ namespace tarkin.cruelty.fika
 {
     public class FikaHandler : IDisposable
     {
-        private object _eventFikaCreated;
+        public event Action<Player, Vector3, float> OnRemoteGrappleShot;
+        public event Action<Player, Vector3> OnRemoteGrappleHit;
+        public event Action<Player, Vector3> OnRemoteGrapplePivotChanged;
+        public event Action<Player, float> OnRemoteGrappleRetract;
 
-        public GameObject PrefabGrappendixVisual { get; set; }
+        private object _eventFikaCreated;
 
         public FikaHandler()
         {
@@ -78,51 +81,35 @@ namespace tarkin.cruelty.fika
 
         private void OnGrappleShotPacketReceived(GrappleShotPacket packet)
         {
-            if (!TryGetController(packet.netId, out var observedController))
-                return;
-
-            observedController.Shoot(packet.direction, packet.speed);
+            if (TryGetPlayer(packet.netId, out FikaPlayer player))
+                OnRemoteGrappleShot?.Invoke(player, packet.direction, packet.speed);
         }
 
         private void OnGrappleHitPacketReceived(GrappleHitPacket packet)
         {
-            if (!TryGetController(packet.netId, out var observedController))
-                return;
-
-            if (packet.first)
-                observedController.Hit(packet.hitPoint);
-            else
-                observedController.ChangePivot(packet.hitPoint);
+            if (TryGetPlayer(packet.netId, out FikaPlayer player))
+            {
+                if (packet.first) OnRemoteGrappleHit?.Invoke(player, packet.hitPoint);
+                else OnRemoteGrapplePivotChanged?.Invoke(player, packet.hitPoint);
+            }
         }
 
         private void OnGrappleRetractPacketReceived(GrappleRetractPacket packet)
         {
-            if (!TryGetController(packet.netId, out var observedController))
-                return;
-
-            observedController.Retract(packet.speed);
+            if (TryGetPlayer(packet.netId, out FikaPlayer player))
+                OnRemoteGrappleRetract?.Invoke(player, packet.speed);
         }
 
-        private bool TryGetController(int playerId, out ObservedPlayerGrapplingController observedController)
+        private bool TryGetPlayer(int playerNetId, out FikaPlayer player)
         {
-            observedController = null;
-
-            if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
+            player = null;
+            if (!CoopHandler.TryGetCoopHandler(out var coopHandler)) 
                 return false;
 
-            if (!coopHandler.Players.TryGetValue(playerId, out var player))
+            if (!coopHandler.Players.TryGetValue(playerNetId, out player)) 
                 return false;
 
-            if (player.IsYourPlayer)
-                return false;
-
-            if (!player.TryGetComponent<ObservedPlayerGrapplingController>(out observedController))
-            {
-                observedController = player.gameObject.AddComponent<ObservedPlayerGrapplingController>();
-                observedController.Init(player, PrefabGrappendixVisual);
-            }
-
-            return true;
+            return !player.IsYourPlayer;
         }
 
         public void Dispose()

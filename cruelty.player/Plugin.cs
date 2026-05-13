@@ -25,11 +25,12 @@ namespace tarkin.cruelty.player
         internal static ConfigEntry<KeyboardShortcut> KeybindGrapple;
         internal static ConfigEntry<bool> FallDamageImmunity;
 
+        // not declaring exact type so an assembly traverser doesn't crash the game when fika is not installed
         private IDisposable _fika;
 
         void Start()
         {
-            Logger = new EFTLogger("crPl", () => true);
+            Logger = new EFTLogger("cruelty.player", () => true);
             BepInEx.Logging.Logger.Sources.Add(Logger);
 
             _patchManager = new PatchManager(this, autoPatch: true);
@@ -64,11 +65,29 @@ namespace tarkin.cruelty.player
             controller.Init(mainPlayer, prefabGrappendixVisual);
             if (_fika != null && _fika is FikaHandler fikaHandler)
             {
-                fikaHandler.PrefabGrappendixVisual = prefabGrappendixVisual;
                 controller.OnShot += fikaHandler.SendGrappleShot;
                 controller.OnHit += fikaHandler.SendGrappleHit;
                 controller.OnPivotChanged += fikaHandler.SendGrapplePivotChanged;
                 controller.OnRetract += fikaHandler.SendGrappleRetract;
+
+                fikaHandler.OnRemoteGrappleShot += (player, dir, speed) 
+                    => GetOrAddObservedGrapplingController(player, prefabGrappendixVisual).OnShotReceived(dir, speed);
+                fikaHandler.OnRemoteGrappleHit += (player, point) 
+                    => GetOrAddObservedGrapplingController(player, prefabGrappendixVisual).OnHitReceived(point);
+                fikaHandler.OnRemoteGrapplePivotChanged += (player, point) 
+                    => GetOrAddObservedGrapplingController(player, prefabGrappendixVisual).OnPivotChangedReceived(point);
+                fikaHandler.OnRemoteGrappleRetract += (player, speed) 
+                    => GetOrAddObservedGrapplingController(player, prefabGrappendixVisual).OnRetractReceived(speed);
+
+                ObservedGrapplingController GetOrAddObservedGrapplingController(Player player, GameObject prefab)
+                {
+                    if (!player.TryGetComponent<ObservedGrapplingController>(out var observedController))
+                    {
+                        observedController = player.gameObject.AddComponent<ObservedGrapplingController>();
+                        observedController.Init(player, prefab);
+                    }
+                    return observedController;
+                }
             }
         }
 
@@ -77,6 +96,7 @@ namespace tarkin.cruelty.player
             Patch_GameWorld_OnGameStarted.OnPostfix -= Init;
 
             FindObjectsByTypeAndDestroy<PlayerGrapplingController>();
+            FindObjectsByTypeAndDestroy<ObservedGrapplingController>();
 
             _patchManager.DisablePatches();
             _patchManager = null;
