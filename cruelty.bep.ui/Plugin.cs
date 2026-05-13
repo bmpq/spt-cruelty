@@ -82,6 +82,7 @@ namespace tarkin.cruelty.bep.ui
             _disposables.Add(new CrueltyAdapterHealth(commonUI, prefabHealth, currentBattleUIPlayerOwner));
             _disposables.Add(new CrueltyAdapterAmmo(commonUI, prefabAmmo, currentBattleUIPlayerOwner));
             _disposables.Add(new CrueltyAdapterPointer(commonUI, prefabPointer));
+            _disposables.Add(new CrueltyAdapterActionPanel(commonUI));
             _disposables.Add(new CrueltyAdapterVisor(textureBiosuit));
             _disposables.Add(new CrueltyAdapterBorder(commonUI, prefabBorder, currentBattleUIPlayerOwner));
             _disposables.Add(new CrueltySixthSense(commonUI, prefabSixthSense, currentBattleUIPlayerOwner));
@@ -158,6 +159,7 @@ namespace tarkin.cruelty.bep.ui
 
             protected override MethodBase GetTargetMethod()
             {
+                // this is actually called every toggle (starting raid, closing inventory)
                 return AccessTools.Method(typeof(EftBattleUIScreen), nameof(EftBattleUIScreen.Show), [typeof(GamePlayerOwner)]);
             }
 
