@@ -25,15 +25,21 @@ namespace tarkin.cruelty.fika
         {
             _eventFikaCreated = new Action<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>((Action<FikaNetworkManagerCreatedEvent>)_eventFikaCreated);
+            if (Singleton<IFikaNetworkManager>.Instantiated)
+            {
+                RegisterPackets(Singleton<IFikaNetworkManager>.Instance);
+            }
         }
 
         public bool IsHeadless() => FikaBackendUtils.IsHeadless;
 
-        private void OnFikaNetworkCreated(FikaNetworkManagerCreatedEvent fikaEvent)
+        private void OnFikaNetworkCreated(FikaNetworkManagerCreatedEvent fikaEvent) => RegisterPackets(fikaEvent.Manager);
+
+        private void RegisterPackets(IFikaNetworkManager fikaNetworkManager)
         {
-            fikaEvent.Manager.RegisterPacket<GrappleShotPacket>(OnGrappleShotPacketReceived);
-            fikaEvent.Manager.RegisterPacket<GrappleHitPacket>(OnGrappleHitPacketReceived);
-            fikaEvent.Manager.RegisterPacket<GrappleRetractPacket>(OnGrappleRetractPacketReceived);
+            fikaNetworkManager.RegisterPacket<GrappleShotPacket>(OnGrappleShotPacketReceived);
+            fikaNetworkManager.RegisterPacket<GrappleHitPacket>(OnGrappleHitPacketReceived);
+            fikaNetworkManager.RegisterPacket<GrappleRetractPacket>(OnGrappleRetractPacketReceived);
         }
 
         public void SendGrappleShot(Player player, Vector3 direction, float speed)
