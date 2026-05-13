@@ -1,3 +1,4 @@
+using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Components;
@@ -19,10 +20,12 @@ namespace tarkin.cruelty.fika
         public event Action<Player, Vector3> OnRemoteGrapplePivotChanged;
         public event Action<Player, float> OnRemoteGrappleRetract;
 
-        private object _eventFikaCreated;
+        private readonly object _eventFikaCreated;
+        private readonly ManualLogSource _logger;
 
-        public FikaHandler()
+        public FikaHandler(ManualLogSource logger)
         {
+            _logger = logger;
             _eventFikaCreated = new Action<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>((Action<FikaNetworkManagerCreatedEvent>)_eventFikaCreated);
             if (Singleton<IFikaNetworkManager>.Instantiated)

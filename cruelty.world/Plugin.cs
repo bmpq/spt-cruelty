@@ -180,7 +180,7 @@ namespace tarkin.cruelty.world
                 item.Dispose();
             }
 
-            _patchManager.DisablePatches();
+            _patchManager?.DisablePatches();
             _patchManager = null;
         }
 

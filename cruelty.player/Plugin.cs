@@ -39,14 +39,14 @@ namespace tarkin.cruelty.player
             KeybindGrapple = Config.Bind("Keybinds", "Keybind Grapple", new KeyboardShortcut(KeyCode.G));
             FallDamageImmunity = Config.Bind("", "FallDamageImmunity", false);
 
+            if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
+                _fika = new FikaHandler(Logger);
+
             Patch_GameWorld_OnGameStarted.OnPostfix += Init;
             if (Singleton<GameWorld>.Instantiated)
             {
                 Init(Singleton<GameWorld>.Instance);
             }
-
-            if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
-                _fika = new FikaHandler();
         }
 
         void Init(GameWorld gameWorld)

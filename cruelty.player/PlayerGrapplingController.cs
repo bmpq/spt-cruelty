@@ -58,8 +58,6 @@ namespace tarkin.cruelty.player
             _view = new GrapplingView(player, prefabGrappendixVisual);
 
             _audioManager = new PlayerGrapplingAudioManager(_player);
-
-            StopGrapple();
         }
 
         private void OnPlayerDead(Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part) => Destroy(this);
