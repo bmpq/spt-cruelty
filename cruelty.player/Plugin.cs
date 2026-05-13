@@ -50,6 +50,9 @@ namespace tarkin.cruelty.player
 
         void Init(GameWorld gameWorld)
         {
+            if (_fika != null && ((FikaHandler)_fika).IsHeadless())
+                return;
+                
             string bundlePath = Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty", "cruelty-world");
             AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
             GameObject[] allPrefabs = bundle.LoadAllAssets<GameObject>();

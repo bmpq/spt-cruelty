@@ -2,6 +2,7 @@ using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
@@ -22,6 +23,8 @@ namespace tarkin.cruelty.fika
             _eventFikaCreated = new Action<FikaNetworkManagerCreatedEvent>(OnFikaNetworkCreated);
             FikaEventDispatcher.SubscribeEvent<FikaNetworkManagerCreatedEvent>((Action<FikaNetworkManagerCreatedEvent>)_eventFikaCreated);
         }
+
+        public bool IsHeadless() => FikaBackendUtils.IsHeadless;
 
         private void OnFikaNetworkCreated(FikaNetworkManagerCreatedEvent fikaEvent)
         {
