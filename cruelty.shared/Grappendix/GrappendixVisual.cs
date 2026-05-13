@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace tarkin.cruelty.shared
 {
+    [DefaultExecutionOrder(110)]
     public class GrappendixVisual : MonoBehaviour
     {
         [SerializeField] private GameObject lumpPrefab;
@@ -35,7 +36,7 @@ namespace tarkin.cruelty.shared
 
         private float _currentSlackScroll;
         private float _currentSlackAmplitude;
-        private GrappleState _state;
+        private GrappleState _state = GrappleState.Idle;
 
         public void SetPoints(Vector3 pointGrapple, Vector3 pointPlayer)
         {
@@ -46,9 +47,11 @@ namespace tarkin.cruelty.shared
         public void SetState(GrappleState state)
         {
             _state = state;
+
+            gameObject.SetActive(state != GrappleState.Idle);
         }
 
-        void Update()
+        void LateUpdate()
         {
             if (lumpPrefab == null)
                 return;

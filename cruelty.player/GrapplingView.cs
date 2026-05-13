@@ -30,6 +30,9 @@ namespace tarkin.cruelty.player
             _player = player;
             _visual = Object.Instantiate(prefabVisual).GetComponent<GrappendixVisual>();
 
+            _state = GrappleState.Idle;
+            _visual.SetState(_state);
+
             var allSurfaces = Field_Player__soundBySurface.GetValue(player) as Dictionary<BaseBallistic.ESurfaceSound, SurfaceSet>;
             _wetSurfaceSet = allSurfaces[BaseBallistic.ESurfaceSound.Puddle];
         }
@@ -73,6 +76,12 @@ namespace tarkin.cruelty.player
             _visual.SetState(_state);
         }
 
+        void Idle()
+        {
+            _state = GrappleState.Idle;
+            _visual.SetState(GrappleState.Idle);
+        }
+
         public void TickVisuals(Vector3 playerPelvisPoint)
         {
             if (_state == GrappleState.Seeking)
@@ -88,6 +97,10 @@ namespace tarkin.cruelty.player
             {
                 _currentHookPos = Vector3.MoveTowards(_currentHookPos, playerPelvisPoint, _retractSpeed * Time.deltaTime);
                 _visual.SetPoints(_currentHookPos, playerPelvisPoint);
+                if (Vector3.Distance(_currentHookPos, playerPelvisPoint) < 0.1f)
+                {
+                    Idle();
+                }
             }
         }
 

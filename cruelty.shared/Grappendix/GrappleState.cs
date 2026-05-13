@@ -2,6 +2,7 @@
 {
     public enum GrappleState : byte
     {
+        Idle,
         Seeking,
         Taut,
         Retracting
