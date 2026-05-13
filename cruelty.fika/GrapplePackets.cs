@@ -53,7 +53,7 @@ namespace tarkin.cruelty.fika
         public void Deserialize(NetDataReader reader)
         {
             netId = reader.GetInt();
-            speed = reader.GetInt();
+            speed = reader.GetFloat();
         }
 
         public void Serialize(NetDataWriter writer)

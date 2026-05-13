@@ -1,6 +1,12 @@
 ﻿using EFT;
 using UnityEngine;
 using tarkin.cruelty.shared;
+using Comfort.Common;
+using Systems.Effects;
+
+#if SPT_4_0
+using LayerMaskController = LayerMaskClass;
+#endif
 
 namespace tarkin.cruelty.fika
 {
@@ -17,6 +23,9 @@ namespace tarkin.cruelty.fika
         private float _retractSpeed;
 
         private GrappleState _state;
+
+        Vector3 playerPoint => _player.PlayerBones.Pelvis.position;
+        private readonly LayerMask collisionMask = LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask;
 
         internal void Init(Player player, GameObject prefabGrappendixVisual)
         {
@@ -42,6 +51,17 @@ namespace tarkin.cruelty.fika
 
             _state = GrappleState.Taut;
             _visual.SetState(_state);
+
+            if (Singleton<Effects>.Instantiated)
+            {
+                Vector3 dir = (hitPoint - playerPoint).normalized;
+                float projectionOffset = 0.1f;
+
+                if (Physics.Raycast(hitPoint - dir * projectionOffset, dir, out RaycastHit hitInfo, projectionOffset * 1.1f, collisionMask))
+                {
+                    Singleton<Effects>.Instance.EmitBloodOnEnvironment(hitInfo.point, hitInfo.normal);
+                }
+            }
         }
 
         internal void ChangePivot(Vector3 hitPoint)
@@ -70,8 +90,6 @@ namespace tarkin.cruelty.fika
         void Update()
         {
             if (_player == null || _player.PlayerBones == null) return;
-
-            Vector3 playerPoint = _player.PlayerBones.Pelvis.position;
 
             if (_state == GrappleState.Seeking)
             {
