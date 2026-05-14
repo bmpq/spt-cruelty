@@ -7,11 +7,13 @@ using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using tarkin.cruelty.fika;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace tarkin.cruelty.player
 {
@@ -89,6 +91,26 @@ namespace tarkin.cruelty.player
                     return observedController;
                 }
             }
+
+            RemoveMapPlayerBlockers();
+        }
+
+        void RemoveMapPlayerBlockers()
+        {
+            HashSet<string> targetNames = ["Custom_LevelBorders"];
+
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (!scene.isLoaded) continue;
+
+                foreach (var go in scene.GetRootGameObjects())
+                {
+                    if (targetNames.Contains(go.name))
+                        go.SetActive(false);
+                }
+            }
+            
         }
 
         void OnDestroy()
