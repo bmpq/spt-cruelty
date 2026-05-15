@@ -25,6 +25,8 @@ namespace tarkin.cruelty.bep.ui
 
         List<IDisposable> _disposables = new List<IDisposable>();
 
+        AssetBundle _bundle; // FMOD does not play audio clips from an unloaded asset bundle, so have to keep it loaded during plugin lifetime
+
         void Start()
         {
             Logger = base.Logger;
@@ -44,15 +46,13 @@ namespace tarkin.cruelty.bep.ui
         void Load(CommonUI commonUI)
         {
             string bundlePath = Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty", "cruelty-ui");
-            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
+            _bundle = AssetBundle.LoadFromFile(bundlePath);
 
             try
             {
-                LoadUI(bundle, commonUI);
+                LoadUI(_bundle, commonUI);
             }
             catch (Exception ex) { Plugin.Logger.LogError(ex); }
-
-            bundle.Unload(false);
         }
 
         void LoadUI(AssetBundle bundle, CommonUI commonUI)
@@ -77,9 +77,11 @@ namespace tarkin.cruelty.bep.ui
             TMP_FontAsset font = bundle.LoadAllAssets<TMP_FontAsset>().First(f => f.name == "XanhMono-Regular SDF");
             TMP_FontAsset font2 = bundle.LoadAllAssets<TMP_FontAsset>().First(f => f.name == "gamefont RASTER");
 
+            AudioClip clipEat = bundle.LoadAllAssets<AudioClip>().First(f => f.name == "CR_eat");
+
             GamePlayerOwner currentBattleUIPlayerOwner = (Field_BattleUIScreen__controller.GetValue(commonUI.EftBattleUIScreen) as EftBattleUIScreenController)?.Owner;
 
-            _disposables.Add(new CrueltyAdapterHealth(commonUI, prefabHealth, currentBattleUIPlayerOwner));
+            _disposables.Add(new CrueltyAdapterHealth(commonUI, prefabHealth, clipEat, currentBattleUIPlayerOwner));
             _disposables.Add(new CrueltyAdapterAmmo(commonUI, prefabAmmo, currentBattleUIPlayerOwner));
             _disposables.Add(new CrueltyAdapterPointer(commonUI, prefabPointer));
             _disposables.Add(new CrueltyAdapterActionPanel(commonUI));
@@ -132,6 +134,9 @@ namespace tarkin.cruelty.bep.ui
             {
                 item.Dispose();
             }
+
+            if (_bundle != null)
+                _bundle.Unload(false);
 
             _patchManager.DisablePatches();
             _patchManager = null;
