@@ -248,15 +248,12 @@ namespace tarkin.cruelty.player
         {
             _player.MovementContext.InputMotionBeforeLimit = momentum;
 
-            if (_player.MovementContext.CurrentState is not SprintPlayerState)
-            {
-                // JumpPlayerState to apply momentum checks if previous state was Sprint
-                _player.MovementContext.PlayerAnimator.Animator.Play("Sprint", 0, 0f);
-                _player.MovementContext.PlayerAnimator.Animator.Update(0.1f); // triggers all bsg state change logic immediately (to write MovementContext.PreviousState)
-            }
-
             _player.MovementContext.PlayerAnimator.Animator.Play("Jump_Move", 0, 0f);
             _player.MovementContext.PlayerAnimator.Animator.Update(0.1f);
+
+            JumpPlayerState jumpState = (JumpPlayerState)_player.MovementContext.CurrentState;
+            jumpState.Bool_0 = true; // _isSprintWasPreviousState (to start auto sprint on land if there is forward input)
+            jumpState.Vector3_1 = momentum.y * Vector3.up; // _liftForce
         }
 
         void OnDestroy()
@@ -286,6 +283,20 @@ namespace tarkin.cruelty.player
                     return;
 
                 instance.ApplyGrapplePhysics(__instance, ref motion, deltaTime);
+            }
+        }
+
+        private class Patch_JumpPlayerState_ApplyMovementAndRotation : ModulePatch
+        {
+            protected override MethodBase GetTargetMethod()
+            {
+                return AccessTools.Method(typeof(JumpPlayerState), nameof(JumpPlayerState.ApplyMovementAndRotation));
+            }
+
+            [PatchPrefix]
+            static void Prefix(JumpPlayerState __instance)
+            {
+                __instance.MovementContext.CharacterController.SpeedLimit = -1f;
             }
         }
     }
