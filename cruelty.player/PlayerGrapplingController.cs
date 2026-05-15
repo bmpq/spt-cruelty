@@ -27,6 +27,7 @@ namespace tarkin.cruelty.player
 
         private float hookSpeed = 120f;
         private float retractSpeed = 70f;
+        private float sphereCastRadius = 0.1f;
         private Vector3 currentHookPos;
         private Vector3 hookDirection;
         private float distanceTraveled;
@@ -78,14 +79,14 @@ namespace tarkin.cruelty.player
             {
                 float step = hookSpeed * Time.deltaTime;
 
-                bool tipHit = Physics.Raycast(currentHookPos, hookDirection, out RaycastHit tipHitInfo, step, collisionMask);
+                bool tipHit = Physics.SphereCast(currentHookPos, sphereCastRadius, hookDirection, out RaycastHit tipHitInfo, step, collisionMask);
 
                 Vector3 nextHookPos = tipHit ? tipHitInfo.point : currentHookPos + (hookDirection * step);
 
                 Vector3 ropeDir = nextHookPos - playerPoint;
                 float ropeDist = ropeDir.magnitude;
 
-                bool ropeHit = Physics.Raycast(playerPoint, ropeDir.normalized, out RaycastHit ropeHitInfo, ropeDist, collisionMask);
+                bool ropeHit = Physics.SphereCast(playerPoint, sphereCastRadius, ropeDir.normalized, out RaycastHit ropeHitInfo, ropeDist, collisionMask);
 
                 if (ropeHit)
                 {
