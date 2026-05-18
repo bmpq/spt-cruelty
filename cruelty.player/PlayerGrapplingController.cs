@@ -93,18 +93,12 @@ namespace tarkin.cruelty.player
                     currentHookPos = ropeHitInfo.point;
 
                     StartGrapple(currentHookPos, ropeHitInfo.normal);
-
-                    if (Singleton<Effects>.Instantiated)
-                        Singleton<Effects>.Instance.EmitBloodOnEnvironment(ropeHitInfo.point, ropeHitInfo.normal);
                 }
                 else if (tipHit)
                 {
                     currentHookPos = tipHitInfo.point;
 
                     StartGrapple(currentHookPos, tipHitInfo.normal);
-
-                    if (Singleton<Effects>.Instantiated)
-                        Singleton<Effects>.Instance.EmitBloodOnEnvironment(tipHitInfo.point, tipHitInfo.normal);
                 }
                 else
                 {
