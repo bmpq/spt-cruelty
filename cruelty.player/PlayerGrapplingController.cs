@@ -13,7 +13,7 @@ namespace tarkin.cruelty.player
     [DefaultExecutionOrder(100)] // probably not necessary
     public class PlayerGrapplingController : MonoBehaviour
     {
-        private static PlayerGrapplingController instance;
+        private static PlayerGrapplingController GrapplingControllerInstance;
         private Player _player;
 
         private GrappleState _state;
@@ -49,7 +49,7 @@ namespace tarkin.cruelty.player
 
         public void Init(Player player, GameObject prefabGrappendixVisual)
         {
-            instance = this;
+            GrapplingControllerInstance = this;
 
             _player = player;
             cam = _player.PlayerBones.HeadCameraCollider.transform;
@@ -202,12 +202,12 @@ namespace tarkin.cruelty.player
             Vector3 currentVelocity = context.Velocity;
             currentVelocity += Physics.gravity * deltaTime;
 
-            float reelSpeed = 25f;
+            float reelSpeed = 32f;
             currentVelocity += directionToTarget * reelSpeed * deltaTime;
 
             if (currentDistance > this.ropeLength)
             {
-                float stiffness = 23f;
+                float stiffness = 25f;
                 float damping = 4f;
 
                 // F = -k * x
@@ -260,8 +260,8 @@ namespace tarkin.cruelty.player
 
             _movementSoundMute?.Dispose();
 
-            if (instance == this)
-                instance = null;
+            if (GrapplingControllerInstance == this)
+                GrapplingControllerInstance = null;
         }
 
         private class Patch_MovementContext_DirectApplyMotion : ModulePatch
@@ -274,10 +274,12 @@ namespace tarkin.cruelty.player
             [PatchPrefix]
             static void Prefix(MovementContext __instance, ref Vector3 motion, float deltaTime, Player ____player)
             {
-                if (instance == null || instance._player != ____player || instance._state != GrappleState.Taut)
+                if (GrapplingControllerInstance == null || 
+                    GrapplingControllerInstance._player != ____player || 
+                    GrapplingControllerInstance._state != GrappleState.Taut)
                     return;
 
-                instance.ApplyGrapplePhysics(__instance, ref motion, deltaTime);
+                GrapplingControllerInstance.ApplyGrapplePhysics(__instance, ref motion, deltaTime);
             }
         }
 

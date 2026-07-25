@@ -116,13 +116,6 @@ namespace tarkin.cruelty.bep.ui
                     receiver.Update();
                 }
             }
-
-#if DEBUG
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                NotificationManager.DisplayMessageNotification("test notifoacitno");
-            }
-#endif
         }
 
         void OnDestroy()
