@@ -9,6 +9,8 @@ obj/
 
 .References/
 
+# I put CR_ prefix on copyrighted materials (ripped from retail Cruelty Squad)
+# .meta sidecar files are tracked
 CR_*.png
 CR_*.wav
 **/CR_*/**/*.png
