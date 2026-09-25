@@ -32,20 +32,26 @@ namespace tarkin.cruelty.player
 
         void Start()
         {
-            Logger = new EFTLogger("cruelty.player", () => true);
+            Logger = new EFTLogger("cruelty.player", () =>
+            #if DEBUG
+                true
+            #else
+                false
+            #endif
+            );
             BepInEx.Logging.Logger.Sources.Add(Logger);
 
             _patchManager = new PatchManager(this, autoPatch: true);
             _patchManager.EnablePatches();
 
-            KeybindGrapple = Config.Bind("Keybinds", "Keybind Grapple", new KeyboardShortcut(KeyCode.G));
+            KeybindGrapple = Config.Bind("Keybinds", "Keybind Grapple", new KeyboardShortcut(KeyCode.V));
             FallDamageImmunity = Config.Bind("", "FallDamageImmunity", false);
 
             if (Chainloader.PluginInfos.ContainsKey("com.fika.core"))
                 _fika = new FikaHandler(Logger);
 
             Patch_GameWorld_OnGameStarted.OnPostfix += Init;
-            if (Singleton<GameWorld>.Instantiated)
+            if (Singleton<AbstractGame>.Instantiated)
             {
                 Init(Singleton<GameWorld>.Instance);
             }
