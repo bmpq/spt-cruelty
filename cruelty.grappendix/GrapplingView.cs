@@ -8,6 +8,8 @@ using UnityEngine;
 using tarkin.cruelty.grappendix.visuals;
 using EFT.CameraControl;
 using System;
+using System.Linq;
+using EFT.Visual;
 
 namespace tarkin.cruelty.grappendix
 {
@@ -32,11 +34,34 @@ namespace tarkin.cruelty.grappendix
             _player = player;
             _visual = new GameObject($"{player.Profile.Nickname} {nameof(GrappendixVisualObject)}").AddComponent<GrappendixVisualObject>();
 
+            if (TryGetHeadMaterial(player, out Material mat))
+                _visual.SetMaterial(mat);
+
             _state = GrappleState.Idle;
             _visual.SetState(_state);
 
             var allSurfaces = Field_Player__soundBySurface.GetValue(player) as Dictionary<BaseBallistic.ESurfaceSound, SurfaceSet>;
             _wetSurfaceSet = allSurfaces[BaseBallistic.ESurfaceSound.Puddle];
+        }
+
+        static bool TryGetHeadMaterial(Player player, out Material mat)
+        {
+            mat = null;
+
+            if (player == null || player.PlayerBody == null)
+                return false;
+
+            if (player.PlayerBody.BodySkins.TryGetValue(EBodyModelPart.Head, out LoddedSkin skin))
+                {
+                var rends = skin.GetRenderers();
+                Renderer rend = rends.FirstOrDefault();
+                if (rend != null)
+                {
+                    mat = rend.sharedMaterial;
+                    return mat != null;
+                }
+            }
+            return false;
         }
 
         public void Shoot(Vector3 startPos, Vector3 direction, float speed)

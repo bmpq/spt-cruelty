@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using tarkin.cruelty.grappendix.GrappendixVisuals;
 using UnityEngine;
@@ -9,6 +10,7 @@ namespace tarkin.cruelty.grappendix.visuals
     {
         public GrappendixVisualConfig config = new GrappendixVisualConfig();
 
+        private GameObject prefabLumb;
         private readonly List<Transform> lumps = new();
 
         private float currentLength;
@@ -34,13 +36,24 @@ namespace tarkin.cruelty.grappendix.visuals
             gameObject.SetActive(state != GrappleState.Idle);
         }
 
+        void Awake()
+        {
+            prefabLumb = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            Component.Destroy(prefabLumb.GetComponent<Collider>());
+            prefabLumb.transform.SetParent(this.transform);
+            prefabLumb.SetActive(false);
+        }
+
+        public void SetMaterial(Material mat)
+        {
+            prefabLumb.GetComponent<Renderer>().sharedMaterial = mat;
+        }
+
         void EnsurePoolSize(int count)
         {
             while (lumps.Count < count && lumps.Count < 1000)
             {
-                GameObject newLump = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                Component.Destroy(newLump.GetComponent<Collider>());
-                newLump.transform.SetParent(this.transform);
+                GameObject newLump = Instantiate(prefabLumb, this.transform);
                 lumps.Add(newLump.transform);
             }
         }
