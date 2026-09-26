@@ -33,7 +33,7 @@ namespace tarkin.cruelty.grappendix.GrappendixVisuals
             slackScrollSpeed = 22f;
 
             faceDirection = true;
-            rotationOffset = Vector3.zero;
+            rotationOffset = new Vector3(180f, -90f, 180f);
         }
     }
 }

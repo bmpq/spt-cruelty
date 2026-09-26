@@ -54,6 +54,11 @@ namespace tarkin.cruelty.grappendix
             if (Singleton<AbstractGame>.Instantiated)
             {
                 Init(Singleton<GameWorld>.Instance);
+
+#if DEBUG
+                Singleton<GameWorld>.Instance.MainPlayer.ActiveHealthController.ChangeEnergy(99);
+                Singleton<GameWorld>.Instance.MainPlayer.ActiveHealthController.ChangeHydration(99);
+#endif
             }
         }
 

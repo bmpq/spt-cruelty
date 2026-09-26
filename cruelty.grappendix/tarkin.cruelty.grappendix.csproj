@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
-    <Version>0.0.1</Version>
+    <Version>0.1.0</Version>
     <LangVersion>latest</LangVersion>
     <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
     <DefineConstants>$(DefineConstants);SPT_4_1</DefineConstants>
