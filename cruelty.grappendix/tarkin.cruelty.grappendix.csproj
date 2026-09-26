@@ -85,8 +85,8 @@
   <Target Name="PackageZip" AfterTargets="CopyFilesAfterBuild" Condition="'$(Configuration)' == 'Release'">
     <PropertyGroup>
       <ZipStagingDir>$(IntermediateOutputPath)ZipStaging\</ZipStagingDir>
-      <ZipPluginDir>$(ZipStagingDir)BepInEx\plugins\tarkin-cruelty\</ZipPluginDir>
-      <ZipFileName>tarkin-cruelty-v$(Version).zip</ZipFileName>
+      <ZipPluginDir>$(ZipStagingDir)BepInEx\plugins\tarkin-grappendix\</ZipPluginDir>
+      <ZipFileName>tarkin-grappendix-v$(Version).zip</ZipFileName>
       <ZipOutputPath>$(OutputPath)$(ZipFileName)</ZipOutputPath>
     </PropertyGroup>
 
