@@ -18,12 +18,13 @@ namespace tarkin.cruelty.grappendix
 
         private GrappleState _state;
 
-        private readonly LayerMask collisionMask = LayersMaskController.HighPolyWithTerrainMask | LayersMaskController.TransparentLayerMask;
+        private readonly LayerMask collisionMask = LayersMaskController.HighPolyWithTerrainMask | LayersMaskController.TransparentLayerMask | LayersMaskController.PlayerMask;
 
+        private Transform trackingTarget;
         private Vector3 grappleTarget;
         private float ropeLength;
 
-        private float maxGrappleDistance = 70f;
+        private float maxGrappleDistance = 80f;
 
         private float hookSpeed = 120f;
         private float retractSpeed = 70f;
@@ -90,12 +91,22 @@ namespace tarkin.cruelty.grappendix
 
                 if (ropeHit)
                 {
+                    if (ropeHitInfo.collider.TryGetComponent(out Player player))
+                    {
+                        trackingTarget = player.PlayerBones.Pelvis.Original;
+                    }
+
                     currentHookPos = ropeHitInfo.point;
 
                     StartGrapple(currentHookPos, ropeHitInfo.normal);
                 }
                 else if (tipHit)
                 {
+                    if (tipHitInfo.collider.TryGetComponent(out Player player))
+                    {
+                        trackingTarget = player.PlayerBones.Pelvis.Original;
+                    }
+
                     currentHookPos = tipHitInfo.point;
 
                     StartGrapple(currentHookPos, tipHitInfo.normal);
@@ -116,13 +127,31 @@ namespace tarkin.cruelty.grappendix
 
             if (_state == GrappleState.Taut)
             {
-                float distToTarget = Vector3.Distance(playerPoint, grappleTarget);
-
-                if (Physics.Raycast(playerPoint, (grappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, collisionMask))
+                void ChangePivot(Vector3 pivot)
                 {
-                    grappleTarget = hit.point;
+                    grappleTarget = pivot;
                     _view.ChangePivot(grappleTarget);
                     OnPivotChanged?.Invoke(_player, grappleTarget);
+                }
+
+
+                if (trackingTarget != null)
+                {
+                    ChangePivot(trackingTarget.position);
+                }
+
+                float distToTarget = Vector3.Distance(playerPoint, grappleTarget);
+                if (Physics.Raycast(playerPoint, (grappleTarget - playerPoint).normalized, out RaycastHit hit, distToTarget, collisionMask))
+                {
+                    if (hit.collider.TryGetComponent(out Player player))
+                    {
+                        trackingTarget = player.PlayerBones.Pelvis.Original;
+                    }
+                    else
+                    {
+                        trackingTarget = null;
+                        ChangePivot(hit.point);
+                    }
                 }
 
                 _player.MovementContext.ResetFlying();
@@ -226,6 +255,8 @@ namespace tarkin.cruelty.grappendix
 
         private void StopGrapple()
         {
+            trackingTarget = null;
+
             if (_state == GrappleState.Taut)
             {
                 ApplyExitMomentum(_player.Velocity);

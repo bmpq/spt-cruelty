@@ -18,6 +18,8 @@ namespace tarkin.cruelty.fika
         public event Action<Player, Vector3, float> OnRemoteGrappleShot;
         public event Action<Player, Vector3> OnRemoteGrappleHit;
         public event Action<Player, Vector3> OnRemoteGrapplePivotChanged;
+        private double _timestampLastSentPivotPacket;
+        private const double PacketSendCooldown = 0.05;
         public event Action<Player, float> OnRemoteGrappleRetract;
 
         private readonly object _eventFikaCreated;
@@ -69,6 +71,10 @@ namespace tarkin.cruelty.fika
 
         public void SendGrapplePivotChanged(Player player, Vector3 point)
         {
+            var now = Time.realtimeSinceStartupAsDouble;
+            if (now - _timestampLastSentPivotPacket < PacketSendCooldown)
+                return;
+
             var packet = new GrappleHitPacket()
             {
                 netId = (player as FikaPlayer).NetId,
@@ -76,6 +82,8 @@ namespace tarkin.cruelty.fika
                 first = false
             };
             Singleton<IFikaNetworkManager>.Instance?.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+
+            _timestampLastSentPivotPacket = now;
         }
 
         public void SendGrappleRetract(Player player, float speed)
