@@ -1,4 +1,4 @@
-﻿namespace tarkin.cruelty.shared
+﻿namespace tarkin.cruelty.grappendix
 {
     public enum GrappleState : byte
     {

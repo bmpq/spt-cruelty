@@ -6,9 +6,9 @@ using System;
 using System.Reflection;
 using Systems.Effects;
 using UnityEngine;
-using tarkin.cruelty.shared;
+using EFT.Ballistics;
 
-namespace tarkin.cruelty.player
+namespace tarkin.cruelty.grappendix
 {
     [DefaultExecutionOrder(100)] // probably not necessary
     public class PlayerGrapplingController : MonoBehaviour
@@ -18,7 +18,7 @@ namespace tarkin.cruelty.player
 
         private GrappleState _state;
 
-        private readonly LayerMask collisionMask = LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask;
+        private readonly LayerMask collisionMask = LayersMaskController.HighPolyWithTerrainMask | LayersMaskController.TransparentLayerMask;
 
         private Vector3 grappleTarget;
         private float ropeLength;
@@ -47,7 +47,7 @@ namespace tarkin.cruelty.player
         public event OnGrapplePivotChanged OnPivotChanged;
         public event OnGrappleRetract OnRetract;
 
-        public void Init(Player player, GameObject prefabGrappendixVisual)
+        public void Init(Player player)
         {
             GrapplingControllerInstance = this;
 
@@ -56,12 +56,12 @@ namespace tarkin.cruelty.player
 
             _player.OnPlayerDead += OnPlayerDead;
 
-            _view = new GrapplingView(player, prefabGrappendixVisual);
+            _view = new GrapplingView(player);
 
             _movementSoundMute = new PlayerMovementSoundMute(_player);
         }
 
-        private void OnPlayerDead(Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part) => Destroy(this);
+        private void OnPlayerDead(Player player, IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part) => Destroy(this);
 
         void Update()
         {
@@ -247,8 +247,8 @@ namespace tarkin.cruelty.player
             _player.MovementContext.PlayerAnimator.Animator.Update(0.1f);
 
             JumpPlayerState jumpState = (JumpPlayerState)_player.MovementContext.CurrentState;
-            jumpState.Bool_0 = true; // _isSprintWasPreviousState (to start auto sprint on land if there is forward input)
-            jumpState.Vector3_1 = momentum.y * Vector3.up; // _liftForce
+            jumpState._isSprintWasPreviousState = true; // to start auto sprint on land if there is forward input
+            jumpState._liftForce = momentum.y * Vector3.up;
         }
 
         void OnDestroy()

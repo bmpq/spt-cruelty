@@ -1,18 +1,18 @@
 ﻿using EFT;
 using UnityEngine;
 
-namespace tarkin.cruelty.player
+namespace tarkin.cruelty.grappendix
 {
     public class ObservedGrapplingController : MonoBehaviour
     {
         private Player _player;
         private GrapplingView _view;
-        private readonly LayerMask collisionMask = LayerMaskController.HighPolyWithTerrainMask | LayerMaskController.TransparentLayerMask;
+        private readonly LayerMask collisionMask = LayersMaskController.HighPolyWithTerrainMask | LayersMaskController.TransparentLayerMask;
 
-        public void Init(Player player, GameObject prefabVisual)
+        public void Init(Player player)
         {
             _player = player;
-            _view = new GrapplingView(player, prefabVisual);
+            _view = new GrapplingView(player);
         }
 
         public void OnShotReceived(Vector3 direction, float speed)

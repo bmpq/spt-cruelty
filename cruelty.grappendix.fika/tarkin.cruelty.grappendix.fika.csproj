@@ -6,7 +6,7 @@
     <Version>0.0.1</Version>
     <LangVersion>latest</LangVersion>
     <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
-    <DefineConstants>$(DefineConstants);SPT_4_0</DefineConstants>
+    <DefineConstants>$(DefineConstants);SPT_4_1</DefineConstants>
   </PropertyGroup>
   
   <ItemGroup>
@@ -15,10 +15,6 @@
     <PackageReference Include="UnityEngine.Modules" Version="2022.3.43" IncludeAssets="compile" />
   </ItemGroup>
   
-  <ItemGroup>
-    <ProjectReference Include="..\cruelty.shared\tarkin.cruelty.shared.csproj" />
-  </ItemGroup>
-
   <ItemGroup>
     <Reference Include="$(SPTPath)\BepInEx\core\0Harmony.dll">
       <Private>False</Private>
@@ -30,7 +26,7 @@
       <Private>False</Private>
     </Reference>
     
-    <Reference Include=".References\Fika.Core.2.2.5.0.dll">
+    <Reference Include=".References\Fika.Core.2.4.3.0.dll">
       <Private>False</Private>
     </Reference>
     
@@ -56,7 +52,7 @@
 
   <Target Name="CopyFilesAfterBuild" AfterTargets="Build">
     <PropertyGroup>
-      <PluginsDir>$(SPTPath)\BepInEx\plugins\tarkin-cruelty\</PluginsDir>
+      <PluginsDir>$(SPTPath)\BepInEx\plugins\tarkin-grappendix\</PluginsDir>
       <BepDestination>$(PluginsDir)</BepDestination>
     </PropertyGroup>
 

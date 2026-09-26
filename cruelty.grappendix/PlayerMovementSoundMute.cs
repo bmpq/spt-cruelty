@@ -4,7 +4,7 @@ using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
 
-namespace tarkin.cruelty.player
+namespace tarkin.cruelty.grappendix
 {
     internal class PlayerMovementSoundMute : IDisposable
     {
@@ -35,20 +35,14 @@ namespace tarkin.cruelty.player
 
         private class Patch_Player_StateChangedHandler : ModulePatch
         {
-            protected override MethodBase GetTargetMethod()
-                => AccessTools.Method(typeof(Player), nameof(Player.method_55));
-            [PatchPrefix]
-            private static bool PatchPrefix(Player __instance)
-                => !ShouldMuteMovementSounds(__instance);
+            protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.StateChangedHandler));
+            [PatchPrefix] private static bool PatchPrefix(Player __instance) => !ShouldMuteMovementSounds(__instance);
         }
 
         private class Patch_Player_PlayTurnSound : ModulePatch
         {
-            protected override MethodBase GetTargetMethod()
-                => AccessTools.Method(typeof(Player), nameof(Player.method_62));
-            [PatchPrefix]
-            static bool PatchPrefix(Player __instance)
-                => !ShouldMuteMovementSounds(__instance);
+            protected override MethodBase GetTargetMethod() => AccessTools.Method(typeof(Player), nameof(Player.PlayTurnSound));
+            [PatchPrefix] private static bool PatchPrefix(Player __instance) => !ShouldMuteMovementSounds(__instance);
         }
     }
 }

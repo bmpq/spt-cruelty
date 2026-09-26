@@ -1,10 +1,11 @@
 ﻿using EFT;
+using EFT.Ballistics;
 using EFT.HealthSystem;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
-namespace tarkin.cruelty.player
+namespace tarkin.cruelty.grappendix
 {
     internal class Patch_ActiveHealthController_ApplyDamage : ModulePatch
     {

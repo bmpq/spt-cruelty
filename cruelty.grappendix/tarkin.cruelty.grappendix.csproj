@@ -6,7 +6,7 @@
     <Version>0.0.1</Version>
     <LangVersion>latest</LangVersion>
     <RootNamespace>$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
-    <DefineConstants>$(DefineConstants);SPT_4_0</DefineConstants>
+    <DefineConstants>$(DefineConstants);SPT_4_1</DefineConstants>
   </PropertyGroup>
   
   <ItemGroup>
@@ -16,9 +16,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <ProjectReference Include="..\cruelty.shared.ui\tarkin.cruelty.shared.ui.csproj" />
-    <ProjectReference Include="..\cruelty.shared\tarkin.cruelty.shared.csproj" />
-    <ProjectReference Include="..\cruelty.fika\tarkin.cruelty.fika.csproj" />
+    <ProjectReference Include="..\cruelty.grappendix.fika\tarkin.cruelty.grappendix.fika.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,8 +52,8 @@
 
   <Target Name="CopyFilesAfterBuild" AfterTargets="Build">
     <PropertyGroup>
-      <ScriptsDir>$(SPTPath)\BepInEx\scripts\tarkin-cruelty\</ScriptsDir>
-      <PluginsDir>$(SPTPath)\BepInEx\plugins\tarkin-cruelty\</PluginsDir>
+      <ScriptsDir>$(SPTPath)\BepInEx\scripts\tarkin-grappendix\</ScriptsDir>
+      <PluginsDir>$(SPTPath)\BepInEx\plugins\tarkin-grappendix\</PluginsDir>
       
       <BepDestination Condition="'$(Configuration)' == 'Debug'">$(ScriptsDir)</BepDestination>
       <BepDestination Condition="'$(Configuration)' == 'Release'">$(PluginsDir)</BepDestination>
@@ -74,7 +72,6 @@
     <Delete Files="@(ObsoleteFiles)" />
 
     <ItemGroup>
-      <CoreFiles Include="$(OutputPath)\tarkin.cruelty.shared.ui.dll" />
       <BepFiles Include="$(OutputPath)\$(AssemblyName).dll" />
       <BepFiles Include="$(OutputPath)\$(AssemblyName).pdb" Condition="'$(Configuration)' == 'Debug'" />
     </ItemGroup>
@@ -97,7 +94,7 @@
 
     <!-- grabs everything from BepDestination folder, except folders starting with a dot prefix -->
     <ItemGroup>
-      <FilesToZip Include="$(BepDestination)**\*.*" Exclude="$(BepDestination)**\.*\**\*.*;$(BepDestination)tarkin.cruelty.fika.dll" />
+      <FilesToZip Include="$(BepDestination)**\*.*" Exclude="$(BepDestination)**\.*\**\*.*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(FilesToZip)" DestinationFolder="$(ZipPluginDir)%(RecursiveDir)" />

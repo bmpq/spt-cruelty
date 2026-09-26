@@ -15,7 +15,7 @@ using tarkin.cruelty.fika;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace tarkin.cruelty.player
+namespace tarkin.cruelty.grappendix
 {
     [BepInPlugin("com.tarkin.cruelty.player", MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
     internal partial class Plugin : BaseUnityPlugin
@@ -62,15 +62,9 @@ namespace tarkin.cruelty.player
             if (_fika != null && ((FikaHandler)_fika).IsHeadless())
                 return;
                 
-            string bundlePath = Path.Combine(BepInEx.Paths.PluginPath, "tarkin-cruelty", "cruelty-world");
-            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
-            GameObject[] allPrefabs = bundle.LoadAllAssets<GameObject>();
-            GameObject prefabGrappendixVisual = allPrefabs.First(p => p.name == "GrappendixVisual");
-            bundle.Unload(false);
-
             Player mainPlayer = gameWorld.MainPlayer;
             PlayerGrapplingController controller = mainPlayer.gameObject.AddComponent<PlayerGrapplingController>();
-            controller.Init(mainPlayer, prefabGrappendixVisual);
+            controller.Init(mainPlayer);
             if (_fika != null && _fika is FikaHandler fikaHandler)
             {
                 controller.OnShot += fikaHandler.SendGrappleShot;
@@ -79,20 +73,20 @@ namespace tarkin.cruelty.player
                 controller.OnRetract += fikaHandler.SendGrappleRetract;
 
                 fikaHandler.OnRemoteGrappleShot += (player, dir, speed) 
-                    => GetOrAddObservedGrapplingController(player, prefabGrappendixVisual).OnShotReceived(dir, speed);
+                    => GetOrAddObservedGrapplingController(player).OnShotReceived(dir, speed);
                 fikaHandler.OnRemoteGrappleHit += (player, point) 
-                    => GetOrAddObservedGrapplingController(player, prefabGrappendixVisual).OnHitReceived(point);
+                    => GetOrAddObservedGrapplingController(player).OnHitReceived(point);
                 fikaHandler.OnRemoteGrapplePivotChanged += (player, point) 
-                    => GetOrAddObservedGrapplingController(player, prefabGrappendixVisual).OnPivotChangedReceived(point);
+                    => GetOrAddObservedGrapplingController(player).OnPivotChangedReceived(point);
                 fikaHandler.OnRemoteGrappleRetract += (player, speed) 
-                    => GetOrAddObservedGrapplingController(player, prefabGrappendixVisual).OnRetractReceived(speed);
+                    => GetOrAddObservedGrapplingController(player).OnRetractReceived(speed);
 
-                ObservedGrapplingController GetOrAddObservedGrapplingController(Player player, GameObject prefab)
+                ObservedGrapplingController GetOrAddObservedGrapplingController(Player player)
                 {
                     if (!player.TryGetComponent<ObservedGrapplingController>(out var observedController))
                     {
                         observedController = player.gameObject.AddComponent<ObservedGrapplingController>();
-                        observedController.Init(player, prefab);
+                        observedController.Init(player);
                     }
                     return observedController;
                 }

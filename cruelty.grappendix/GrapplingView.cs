@@ -5,14 +5,16 @@ using System.Collections.Generic;
 using System.Reflection;
 using Systems.Effects;
 using UnityEngine;
-using tarkin.cruelty.shared;
+using tarkin.cruelty.grappendix.visuals;
+using EFT.CameraControl;
+using System;
 
-namespace tarkin.cruelty.player
+namespace tarkin.cruelty.grappendix
 {
-    public class GrapplingView
+    public class GrapplingView : IDisposable
     {
         private readonly Player _player;
-        private readonly GrappendixVisual _visual;
+        private readonly GrappendixVisualObject _visual;
 
         private readonly SurfaceSet _wetSurfaceSet;
         private static readonly FieldInfo Field_Player__soundBySurface = AccessTools.Field(typeof(Player), "_soundBySurface");
@@ -25,10 +27,10 @@ namespace tarkin.cruelty.player
         private float _retractSpeed;
         private Vector3 _pivotPoint;
 
-        public GrapplingView(Player player, GameObject prefabVisual)
+        public GrapplingView(Player player)
         {
             _player = player;
-            _visual = Object.Instantiate(prefabVisual).GetComponent<GrappendixVisual>();
+            _visual = new GameObject($"{player.Profile.Nickname} {nameof(GrappendixVisualObject)}").AddComponent<GrappendixVisualObject>();
 
             _state = GrappleState.Idle;
             _visual.SetState(_state);
@@ -117,7 +119,7 @@ namespace tarkin.cruelty.player
         public void Dispose()
         {
             if (_visual != null)
-                Object.Destroy(_visual.gameObject);
+                GameObject.Destroy(_visual.gameObject);
         }
     }
 }

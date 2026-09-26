@@ -1,30 +1,13 @@
 using System.Collections.Generic;
+using tarkin.cruelty.grappendix.GrappendixVisuals;
 using UnityEngine;
 
-namespace tarkin.cruelty.shared
+namespace tarkin.cruelty.grappendix.visuals
 {
     [DefaultExecutionOrder(110)]
-    public class GrappendixVisual : MonoBehaviour
+    public class GrappendixVisualObject : MonoBehaviour
     {
-        [SerializeField] private GameObject lumpPrefab;
-
-        [SerializeField] private float segmentSpacing = 0.5f;
-
-        [Space(10)]
-        [SerializeField] private float baseScale = 1f;
-        [SerializeField] private float scaleVariation = 0.25f;
-        [SerializeField] private float scaleFrequency = 4f;
-        [SerializeField] private float scaleScrollSpeed = 6f;
-
-        [Space(10)]
-        [SerializeField] private float slackFactorRate = 2f;
-        [SerializeField] private float slackMaxAmplitude = 0.4f;
-        [SerializeField] private float slackFrequency = 0.15f;
-        [SerializeField] private float slackScrollSpeed = 15f;
-
-        [Space(10)]
-        [SerializeField] private bool faceDirection = true;
-        [SerializeField] private Vector3 rotationOffset;
+        public GrappendixVisualConfig config = new GrappendixVisualConfig();
 
         private readonly List<Transform> lumps = new();
 
@@ -51,23 +34,31 @@ namespace tarkin.cruelty.shared
             gameObject.SetActive(state != GrappleState.Idle);
         }
 
+        void EnsurePoolSize(int count)
+        {
+            while (lumps.Count < count && lumps.Count < 1000)
+            {
+                GameObject newLump = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                Component.Destroy(newLump.GetComponent<Collider>());
+                newLump.transform.SetParent(this.transform);
+                lumps.Add(newLump.transform);
+            }
+        }
+
         void LateUpdate()
         {
-            if (lumpPrefab == null)
-                return;
-
             switch (_state)
             {
                 case GrappleState.Seeking:
-                    _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, slackMaxAmplitude, slackFactorRate * Time.deltaTime);
-                    _currentSlackScroll -= Time.deltaTime * slackScrollSpeed;
+                    _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, config.slackMaxAmplitude, config.slackFactorRate * Time.deltaTime);
+                    _currentSlackScroll -= Time.deltaTime * config.slackScrollSpeed;
                     break;
                 case GrappleState.Taut:
-                    _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, 0f, slackFactorRate * 2f * Time.deltaTime);
+                    _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, 0f, config.slackFactorRate * 2f * Time.deltaTime);
                     break;
                 case GrappleState.Retracting:
-                    _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, slackMaxAmplitude, slackFactorRate * Time.deltaTime);
-                    _currentSlackScroll += Time.deltaTime * slackScrollSpeed;
+                    _currentSlackAmplitude = Mathf.MoveTowards(_currentSlackAmplitude, config.slackMaxAmplitude, config.slackFactorRate * Time.deltaTime);
+                    _currentSlackScroll += Time.deltaTime * config.slackScrollSpeed;
                     break;
             }
 
@@ -77,7 +68,7 @@ namespace tarkin.cruelty.shared
             Vector3 direction = (end - start).normalized;
             currentLength = Vector3.Distance(start, end);
 
-            requiredCount = Mathf.CeilToInt(currentLength / segmentSpacing);
+            requiredCount = Mathf.CeilToInt(currentLength / config.segmentSpacing);
 
             EnsurePoolSize(requiredCount);
 
@@ -94,7 +85,7 @@ namespace tarkin.cruelty.shared
                 lump.gameObject.SetActive(true);
 
                 // Position travels FROM grapple point TO player
-                float distanceAlongLine = Mathf.Repeat((i * segmentSpacing), currentLength);
+                float distanceAlongLine = Mathf.Repeat((i * config.segmentSpacing), currentLength);
                 Vector3 linearPos = start + direction * distanceAlongLine;
 
                 // -- looseness when not taut
@@ -112,9 +103,10 @@ namespace tarkin.cruelty.shared
                         positionSlackModifier = 1f;
                         break;
                 }
+
                 if (t > 0.9f)
                     positionSlackModifier *= Mathf.Lerp(1f, 0f ,Mathf.InverseLerp(0.9f, 1f, t));
-                float sineValue = Mathf.Sin(t * slackFrequency * Mathf.PI * 2f * currentLength + _currentSlackScroll) * _currentSlackAmplitude * positionSlackModifier;
+                float sineValue = Mathf.Sin(t * config.slackFrequency * Mathf.PI * 2f * currentLength + _currentSlackScroll) * _currentSlackAmplitude * positionSlackModifier;
                 Vector3 orthogonalDirection = Vector3.Cross(direction, Vector3.up).normalized;
                 Vector3 sineWavePoint = linearPos + orthogonalDirection * sineValue;
                 lump.position = sineWavePoint;
@@ -122,21 +114,21 @@ namespace tarkin.cruelty.shared
                 // -- scale variation (pulsating)
                 float wave =
                     Mathf.Sin(
-                        (distanceAlongLine * scaleFrequency) -
-                        (Time.time * scaleScrollSpeed)
+                        (distanceAlongLine * config.scaleFrequency) -
+                        (Time.time * config.scaleScrollSpeed)
                     );
 
                 float scale =
-                    baseScale +
-                    (wave * scaleVariation);
+                    config.baseScale +
+                    (wave * config.scaleVariation);
 
                 lump.localScale = Vector3.one * scale;
 
-                if (faceDirection)
+                if (config.faceDirection)
                 {
                     lump.rotation =
                         Quaternion.LookRotation(direction) *
-                        Quaternion.Euler(rotationOffset);
+                        Quaternion.Euler(config.rotationOffset);
                 }
             }
         }
@@ -146,15 +138,6 @@ namespace tarkin.cruelty.shared
             for (int i = 0; i < lumps.Count; i++)
             {
                 lumps[i].gameObject.SetActive(false);
-            }
-        }
-
-        void EnsurePoolSize(int count)
-        {
-            while (lumps.Count < count)
-            {
-                GameObject obj = Instantiate(lumpPrefab, transform);
-                lumps.Add(obj.transform);
             }
         }
     }
