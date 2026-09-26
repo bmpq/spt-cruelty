@@ -92,25 +92,7 @@ namespace tarkin.cruelty.grappendix
                 }
             }
 
-            RemoveMapPlayerBlockers();
-        }
-
-        void RemoveMapPlayerBlockers()
-        {
-            HashSet<string> targetNames = ["Custom_LevelBorders"];
-
-            for (int i = 0; i < SceneManager.sceneCount; i++)
-            {
-                Scene scene = SceneManager.GetSceneAt(i);
-                if (!scene.isLoaded) continue;
-
-                foreach (var go in scene.GetRootGameObjects())
-                {
-                    if (targetNames.Contains(go.name))
-                        go.SetActive(false);
-                }
-            }
-            
+            LevelBorders.Disable();
         }
 
         void OnDestroy()
